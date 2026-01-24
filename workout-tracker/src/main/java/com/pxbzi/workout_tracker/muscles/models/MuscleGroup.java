@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public enum MuscleGroup {
     CHEST,
     BACK,
+    SHOULDERS,
     ARMS,
     CORE,
     LEGS;

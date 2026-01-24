@@ -21,6 +21,7 @@ public class Exercise {
     @Column(unique = true, nullable = false, updatable = false)
     private Long id;
 
+    @Column(nullable = false, length = 100, unique = true)
     private String name;
 
     private String description;

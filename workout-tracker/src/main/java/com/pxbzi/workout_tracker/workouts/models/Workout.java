@@ -12,9 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(indexes = {
-        @Index(name = "idx_workout_exercise_id", columnList = "workout_id"),
+        @Index(name = "idx_workout_exercise_id", columnList = "exercise_id"),
         @Index(name = "idx_workout_date", columnList = "workout_date"),
-        @Index(name = "idx_set_workout_id", columnList = "workout_id")
 })
 @Data
 @NoArgsConstructor

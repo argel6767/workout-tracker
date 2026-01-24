@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/workouts")
+@RequestMapping("/v1/workouts")
 @Data
 @AllArgsConstructor
 public class WorkoutController {
