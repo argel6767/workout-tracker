@@ -1,6 +1,7 @@
 package com.pxbzi.workout_tracker.workouts.models;
 
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ public class Workout {
     private LocalDate workoutDate;
 
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Set> sets;
+    private List<WorkoutSet> workoutSets;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -1,5 +1,6 @@
-package com.pxbzi.workout_tracker.workouts.models;
+package com.pxbzi.workout_tracker.workout_sets.models;
 
+import com.pxbzi.workout_tracker.workouts.models.Workout;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,12 +10,12 @@ import java.time.LocalDateTime;
 @Entity
 @Table(indexes = {
     @Index(name = "idx_set_workout_id", columnList = "workout_id")
-})
+}, name = "set")
 @Data
 @NoArgsConstructor
-public class Set {
+public class WorkoutSet {
 
-    public Set(Workout workout, Integer reps, Double weight) {
+    public WorkoutSet(Workout workout, Integer reps, Double weight) {
         this.workout = workout;
         this.reps = reps;
         this.weight = weight;

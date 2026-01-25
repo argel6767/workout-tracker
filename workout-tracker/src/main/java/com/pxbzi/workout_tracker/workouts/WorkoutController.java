@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -36,6 +37,12 @@ public class WorkoutController {
     public ResponseEntity<WorkoutDto> getWorkoutById(@PathVariable Long id) {
         WorkoutDto dto = workoutService.getWorkout(id);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/dates")
+    public ResponseEntity<List<WorkoutDto>> getWorkoutsByDate(@RequestParam LocalDate date) {
+        List<WorkoutDto> dtos = workoutService.getWorkoutsByDate(date);
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping()
