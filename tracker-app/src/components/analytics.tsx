@@ -1,6 +1,6 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Label } from "recharts";
 import {useState} from "react";
-import { useGetRelativeStrengthByExercise } from "../hooks/useGetGetRelativeStrengthByExercise";
+//import { useGetRelativeStrengthByExercise } from "../hooks/useGetGetRelativeStrengthByExercise";
 import { useGetExerciseAnalytics } from "../hooks/useGetExerciseAnalytics";
 import { ExerciseData } from "./exercise-data";
 
@@ -22,8 +22,17 @@ export const AnalyticsContainer = () => {
   
   return (
     <main className="p-2 flex flex-col gap-4">
-      <div className="pl-4">
-        <ExerciseData handleExerciseChange={handleExerciseChange}/>
+      <div className="px-4 flex justify-between">
+        <ExerciseData handleExerciseChange={handleExerciseChange} />
+        <div>
+          <label className="flex flex-col gap-2 text-lg">Months Back
+            <span className="flex gap-2 text-lg items-center">
+            <button className="btn btn-square" onClick={decreaseMonthsBack} disabled={numMonthsBack <= 1}>-</button>
+            <span>{numMonthsBack}</span>
+              <button className="btn btn-square" onClick={increaseMonthsBack}>+</button>
+            </span>
+            </label>
+        </div>
       </div>
       <ExerciseAnalytics exerciseId={exerciseId} numMonthsBack={numMonthsBack}/>
     </main>
