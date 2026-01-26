@@ -1,5 +1,5 @@
 import { apiClient } from "./apiConfig";
-import type { MuscleDto, NewMuscleDto } from "../lib/dtos";
+import type { MuscleDto, NewMuscleDto } from "../lib/form-dtos";
 
 const V1_MUSCLE_ENDPOINT = "/v1/muscles";
 

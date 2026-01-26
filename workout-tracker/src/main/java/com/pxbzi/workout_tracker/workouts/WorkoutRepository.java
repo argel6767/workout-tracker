@@ -12,6 +12,10 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findByWorkoutDate(LocalDate workoutDate);
 
     List<Workout> findByWorkoutDateBetween(LocalDate startDate, LocalDate endDate);
+    
+    @Query("SELECT w FROM Workout w " +
+            "WHERE w.exercise.id = :exerciseId")
+    List<Workout> findByExercise(Long exerciseId);
 
     @Query("SELECT w FROM Workout w " +
             "WHERE w.exercise.id = :exerciseId " +

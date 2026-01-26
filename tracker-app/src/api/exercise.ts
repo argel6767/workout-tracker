@@ -1,4 +1,4 @@
-import type { ExerciseDto, NewExerciseDto } from '../lib/dtos';
+import type { ExerciseDto, NewExerciseDto } from '../lib/form-dtos';
 import { apiClient } from './apiConfig';
 
 const V1_EXERCISES = '/v1/exercises';

@@ -32,17 +32,23 @@ public class WorkoutController {
         List<WorkoutDto> dtos = workoutService.bulkCreateWorkouts(newWorkoutDtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtos);
     }
+    
+    @GetMapping("/dates")
+    public ResponseEntity<List<WorkoutDto>> getWorkoutsByDate(@RequestParam LocalDate date) {
+        List<WorkoutDto> dtos = workoutService.getWorkoutsByDate(date);
+        return ResponseEntity.ok(dtos);
+    }
+
+    @GetMapping("/exercises")
+    public ResponseEntity<List<WorkoutDto>> getWorkoutsByExercise(@RequestParam Long exerciseId) {
+        List<WorkoutDto> dtos = workoutService.getWorkoutsByExercise(exerciseId);
+        return ResponseEntity.ok(dtos);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<WorkoutDto> getWorkoutById(@PathVariable Long id) {
         WorkoutDto dto = workoutService.getWorkout(id);
         return ResponseEntity.ok(dto);
-    }
-
-    @GetMapping("/dates")
-    public ResponseEntity<List<WorkoutDto>> getWorkoutsByDate(@RequestParam LocalDate date) {
-        List<WorkoutDto> dtos = workoutService.getWorkoutsByDate(date);
-        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping()

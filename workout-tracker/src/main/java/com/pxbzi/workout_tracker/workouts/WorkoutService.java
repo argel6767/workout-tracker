@@ -48,6 +48,13 @@ public class WorkoutService {
                 .map(WorkoutDto::getWorkoutDto)
                 .toList();
     }
+    
+    public List<WorkoutDto> getWorkoutsByExercise(Long exerciseId) {
+        List<Workout> workouts = workoutRepository.findByExercise(exerciseId);
+        return workouts.stream()
+                .map(WorkoutDto::getWorkoutDto)
+                .toList();
+    }
 
     public void deleteWorkout(Long id) {
         workoutRepository.deleteById(id);

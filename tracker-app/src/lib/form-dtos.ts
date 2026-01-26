@@ -45,4 +45,15 @@ export type WorkoutDto = {
   id: number;
   exercise: ExerciseDto;
   sets: SetDto[];
+  workoutDate: string;
+};
+
+export type NewWeightDto = {
+  weight: number;
+};
+
+export type WeightDto = {
+  id: number;
+  weight: number;
+  entryDate: string;
 };

@@ -1,10 +1,19 @@
 import { apiClient } from "./apiConfig";
-import type { NewWorkoutDto, WorkoutDto } from "../lib/dtos";
+import type { NewWorkoutDto, WorkoutDto } from "../lib/form-dtos";
 
 const V1_WORKOUTS = "/v1/workouts";
 
 export const getWorkouts = async (): Promise<WorkoutDto[]> => {
   const response = await apiClient.get(V1_WORKOUTS);
+  return response.data;
+};
+
+export const getWorkoutsByExercise = async (exerciseId: number): Promise<WorkoutDto[]> => {
+  const response = await apiClient.get(`${V1_WORKOUTS}/exercises`, {
+    params: {
+      exerciseId
+    }
+  });
   return response.data;
 };
 
