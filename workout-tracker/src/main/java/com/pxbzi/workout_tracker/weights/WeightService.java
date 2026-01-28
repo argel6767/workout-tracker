@@ -28,6 +28,12 @@ public class WeightService {
         return WeightDto.getWeightDto(weight);
     }
 
+    public WeightDto getNewestWeightEntry() {
+        Weight weight = weightRepository.findNewest()
+                .orElseThrow();
+        return WeightDto.getWeightDto(weight);
+    }
+
     public List<WeightDto> getAllWeightsInDateRange(int numMonthsBack) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(numMonthsBack);

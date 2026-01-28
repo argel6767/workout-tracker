@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 
@@ -14,11 +15,17 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findByWorkoutDateBetween(LocalDate startDate, LocalDate endDate);
     
     @Query("SELECT w FROM Workout w " +
-            "WHERE w.exercise.id = :exerciseId")
+            "WHERE w.exercise.id = :exerciseId " +
+            "ORDER BY w.workoutDate DESC")
     List<Workout> findByExercise(Long exerciseId);
 
     @Query("SELECT w FROM Workout w " +
             "WHERE w.exercise.id = :exerciseId " +
             "AND w.workoutDate BETWEEN :startDate AND :endDate")
     List<Workout> findByExerciseAndDateRange(Long exerciseId, LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT w FROM Workout w " +
+            "WHERE w.exercise.id = :exerciseId " +
+            "ORDER BY w.workoutDate DESC LIMIT 1")
+    Optional<Workout> findNewestByExerciseId(Long exerciseId);
 }

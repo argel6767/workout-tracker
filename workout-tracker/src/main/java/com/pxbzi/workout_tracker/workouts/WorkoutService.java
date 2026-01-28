@@ -56,6 +56,12 @@ public class WorkoutService {
                 .toList();
     }
 
+    public WorkoutDto getNewestWorkoutByExercise(Long exerciseId) {
+        Workout workout = workoutRepository.findNewestByExerciseId(exerciseId)
+                .orElseThrow();
+        return WorkoutDto.getWorkoutDto(workout);
+    }
+
     public void deleteWorkout(Long id) {
         workoutRepository.deleteById(id);
     }

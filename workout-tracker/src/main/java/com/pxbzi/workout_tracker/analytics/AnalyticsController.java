@@ -1,9 +1,11 @@
 package com.pxbzi.workout_tracker.analytics;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pxbzi.workout_tracker.analytics.models.AnalyticsDto;
 import com.pxbzi.workout_tracker.analytics.models.RelativeStrengthDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleGroupDto;
+import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
 import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,11 @@ public class AnalyticsController {
     @GetMapping("/progress/relative-strength")
     public List<RelativeStrengthDto> getRelativeStrengthByExerciseId( @RequestParam Integer numOfMonthsBack, @RequestParam Long exerciseId) {
         return analyticsService.getRelativeStrength(numOfMonthsBack, exerciseId);
+    }
+
+    @GetMapping("progress/ai-analysis")
+    public ChatResponseDto getAiWorkoutAnalyticsByExerciseId(@RequestParam Long exerciseId) throws JsonProcessingException {
+        return analyticsService.analyzeExerciseProgression(exerciseId);
     }
 
     @GetMapping("/strongest-exercises/muscle-groups/{muscleGroup}")

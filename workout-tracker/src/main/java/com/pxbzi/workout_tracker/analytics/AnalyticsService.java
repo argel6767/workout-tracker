@@ -1,14 +1,22 @@
 package com.pxbzi.workout_tracker.analytics;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxbzi.workout_tracker.analytics.models.*;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+
+import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
+import com.pxbzi.workout_tracker.gemini.GeminiService;
+import com.pxbzi.workout_tracker.gemini.models.ExerciseProgressionDto;
 import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import com.pxbzi.workout_tracker.weights.WeightService;
 import com.pxbzi.workout_tracker.weights.models.WeightDto;
 import com.pxbzi.workout_tracker.workout_sets.WorkoutSetRepository;
+
 import com.pxbzi.workout_tracker.workouts.WorkoutService;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import com.pxbzi.workout_tracker.workouts.models.Workout;
+import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -30,6 +38,11 @@ public class AnalyticsService {
     private final WorkoutService workoutService;
     private final WorkoutSetRepository workoutSetRepository;
     private final WeightService weightService;
+    private final GeminiService geminiService;
+    private final ObjectMapper objectMapper;
+    private static final int AGE = 23;
+    private static final String SEX = "male";
+
 
     public AnalyticsDto getWorkoutAnalyticsByExerciseId(Long exerciseId, Integer numOfMonthsBack) {
         List<Workout> workouts = workoutService.getWorkoutsByExerciseId(exerciseId, numOfMonthsBack);
@@ -141,6 +154,15 @@ public class AnalyticsService {
                     return new RelativeStrengthDto(weight, oneRepMax, relativeStrength, date);
                 })
                 .toList();
+    }
+
+    public ChatResponseDto analyzeExerciseProgression(Long exerciseId) throws JsonProcessingException {
+        WorkoutDto workout = workoutService.getNewestWorkoutByExercise(exerciseId);
+        WeightDto weight = weightService.getNewestWeightEntry();
+        ExerciseProgressionDto dto = ExerciseProgressionDto.getExerciseProgressionDto(workout, weight, AGE, SEX);
+
+        String dtoStringfy = objectMapper.writeValueAsString(dto);
+        return geminiService.getChatResponseDto(dtoStringfy);
     }
 
     private WorkoutSet getTopSet(Workout workout) {
