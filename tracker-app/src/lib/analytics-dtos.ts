@@ -31,3 +31,8 @@ export type StrongestExerciseByMuscleGroupDto = {
   oneRepMax: number;
   muscleGroup: MuscleGroup;
 };
+
+export type ChatResponseDto = {
+  body: string;
+  timestamp: string;
+}

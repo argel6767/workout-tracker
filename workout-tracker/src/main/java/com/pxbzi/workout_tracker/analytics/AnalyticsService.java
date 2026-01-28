@@ -14,6 +14,7 @@ import com.pxbzi.workout_tracker.weights.models.WeightDto;
 import com.pxbzi.workout_tracker.workout_sets.WorkoutSetRepository;
 
 import com.pxbzi.workout_tracker.workouts.WorkoutService;
+import com.pxbzi.workout_tracker.workout_sets.models.SetDto;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import com.pxbzi.workout_tracker.workouts.models.Workout;
 import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
@@ -159,7 +160,10 @@ public class AnalyticsService {
     public ChatResponseDto analyzeExerciseProgression(Long exerciseId) throws JsonProcessingException {
         WorkoutDto workout = workoutService.getNewestWorkoutByExercise(exerciseId);
         WeightDto weight = weightService.getNewestWeightEntry();
-        ExerciseProgressionDto dto = ExerciseProgressionDto.getExerciseProgressionDto(workout, weight, AGE, SEX);
+        SetDto topSet = workout.sets().stream()
+                .max(Comparator.comparingDouble(SetDto::weight))
+                .orElseThrow();
+        ExerciseProgressionDto dto = ExerciseProgressionDto.getExerciseProgressionDto(workout, topSet, weight, AGE, SEX);
 
         String dtoStringfy = objectMapper.writeValueAsString(dto);
         return geminiService.getChatResponseDto(dtoStringfy);

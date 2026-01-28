@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExerciseData } from "./exercise-data";
 import { useGetWorkoutsByExercise } from "../hooks/useGetWorkoutsByExercise";
+import { AiAnalysisCard } from "./card";
 
 type TableProps<T extends Record<string, unknown>> = {
   data: T[];
@@ -25,9 +26,12 @@ export const TableContainer = () => {
   return (
     <main className="hero">
       <span className="hero-content text-center">
-        <div className="flex flex-col gap-4">
-          <ExerciseData handleExerciseChange={handleExerciseChange} />
+        <div className="flex flex-col gap-8 justify-center items-center">
+          <nav>
+            <ExerciseData handleExerciseChange={handleExerciseChange} />
+          </nav>
           {renderTableContent()}
+          <AiAnalysisCard exerciseId={exerciseId}/>
         </div>
       </span>
     </main>
@@ -127,7 +131,7 @@ const Table = <T extends Record<string, unknown>>({ data }: TableProps<T>) => {
 
   return (
     <main>
-      <table className="table">
+      <table className="table-lg">
         <thead>
           <tr>
             {headers.map((header) => (

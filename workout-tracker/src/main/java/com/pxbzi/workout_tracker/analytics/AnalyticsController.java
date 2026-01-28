@@ -29,8 +29,8 @@ public class AnalyticsController {
         return analyticsService.getRelativeStrength(numOfMonthsBack, exerciseId);
     }
 
-    @GetMapping("progress/ai-analysis")
-    public ChatResponseDto getAiWorkoutAnalyticsByExerciseId(@RequestParam Long exerciseId) throws JsonProcessingException {
+    @GetMapping("/progress/ai-analysis")
+    public ChatResponseDto getAiAnalysisByExerciseId(@RequestParam Long exerciseId) throws JsonProcessingException {
         return analyticsService.analyzeExerciseProgression(exerciseId);
     }
 
