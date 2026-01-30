@@ -47,6 +47,7 @@ export const ExerciseData = ({handleExerciseChange}: ExerciseDataProps) => {
           onChange={handleExerciseChange}
           className="bg-base-200 rounded-lg p-1"
         >
+          <option>Select</option>
           {exercises!.map((exercise) => (
             <option key={exercise.id} value={exercise.id}>
               {exercise.name}
