@@ -180,7 +180,8 @@ public class AnalyticsService {
         double volume = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            volume += (workoutSet.getReps() * workoutSet.getWeight());
+            double weight = workoutSet.getWeight().equals(0.0) ? 1 : workoutSet.getWeight();
+            volume += (workoutSet.getReps() * weight);
         }
         return new DataPoint(workout.getWorkoutDate(), volume);
     }
@@ -190,7 +191,8 @@ public class AnalyticsService {
         int reps = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            volume += (workoutSet.getReps() * workoutSet.getWeight());
+            double weight = workoutSet.getWeight().equals(0.0) ? 1 : workoutSet.getWeight();
+            volume += (workoutSet.getReps() * weight);
             reps += workoutSet.getReps();
         }
 
@@ -198,7 +200,8 @@ public class AnalyticsService {
     }
 
     private double calculateEstimatedOneRepMax(WorkoutSet maxWorkoutSet) {
-        return maxWorkoutSet.getWeight() * (1 + ((double) maxWorkoutSet.getReps() /30));
+        double weight = maxWorkoutSet.getWeight().equals(0.0) ? 1 : maxWorkoutSet.getWeight();
+        return weight * (1 + ((double) maxWorkoutSet.getReps() /30));
     }
 
     private Pair<LocalDate, LocalDate> calculateDateRange(int numMonthsBack) {

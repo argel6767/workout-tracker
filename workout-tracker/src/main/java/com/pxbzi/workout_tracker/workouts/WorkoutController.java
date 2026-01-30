@@ -56,6 +56,12 @@ public class WorkoutController {
         List<WorkoutDto> dtos = workoutService.getAllWorkouts();
         return ResponseEntity.ok(dtos);
     }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<WorkoutDto> updateWorkout(@PathVariable Long id, @RequestBody WorkoutDto workoutDto) {
+        WorkoutDto updatedDto = workoutService.updateWorkout(id, workoutDto);
+        return ResponseEntity.ok(updatedDto);
+    }
 
     @DeleteMapping()
     public ResponseEntity<WorkoutDto> deleteWorkoutById(@PathVariable Long id) {

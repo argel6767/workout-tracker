@@ -3,6 +3,7 @@ package com.pxbzi.workout_tracker.workouts;
 import com.pxbzi.workout_tracker.exercises.ExerciseService;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
 import com.pxbzi.workout_tracker.workouts.models.NewWorkoutDto;
+import com.pxbzi.workout_tracker.workout_sets.models.SetDto;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import com.pxbzi.workout_tracker.workouts.models.Workout;
 import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Data
 @AllArgsConstructor
@@ -61,6 +65,17 @@ public class WorkoutService {
                 .orElseThrow();
         return WorkoutDto.getWorkoutDto(workout);
     }
+    
+    public WorkoutDto updateWorkout(Long workoutId, WorkoutDto workoutDto) {
+        Workout workout = workoutRepository.findById(workoutId)
+                .orElseThrow();
+        
+        Exercise exercise = exerciseService.getExerciseEntity(workoutDto.exercise().id());
+        workout.setExercise(exercise);
+        mapWorkoutSets(workoutDto.sets(), workout);
+        workout = workoutRepository.save(workout);
+        return WorkoutDto.getWorkoutDto(workout);
+    }
 
     public void deleteWorkout(Long id) {
         workoutRepository.deleteById(id);
@@ -85,6 +100,19 @@ public class WorkoutService {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(numOfMonthsBack);
         return workoutRepository.findByExerciseAndDateRange(exerciseId, startDate, endDate);
+    }
+    
+    private void mapWorkoutSets(List<SetDto> sets, Workout workout) {
+        Map<Long, SetDto> setsMap = sets.stream()
+                .collect(Collectors.toMap(SetDto::id, Function.identity()));
+        
+        workout.getWorkoutSets().forEach(set -> {
+            SetDto dto = setsMap.get(set.getId());
+            if (dto != null) {
+                set.setWeight(dto.weight());
+                set.setReps(dto.reps());
+            }
+        });
     }
 
     private Workout mapWorkout(NewWorkoutDto newWorkoutDto) {
