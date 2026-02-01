@@ -3,7 +3,7 @@ import { getRelativeStrengthByExercise } from "../api/analytics";
 
 export const useGetRelativeStrengthByExercise = (exerciseId: number, numOfMonthsBack: number) => {
   return useQuery({
-    queryKey: [exerciseId, numOfMonthsBack],
+    queryKey: ["relativeStrength", exerciseId, numOfMonthsBack],
     queryFn: async () => {return await getRelativeStrengthByExercise(exerciseId, numOfMonthsBack)}
   })
 }

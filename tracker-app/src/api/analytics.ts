@@ -1,5 +1,5 @@
 import { apiClient } from "./apiConfig"
-import type { AnalyticsDto, ChatResponseDto } from "../lib/analytics-dtos"
+import type { AnalyticsDto, ChatResponseDto, RelativeStrengthDto } from "../lib/analytics-dtos"
 
 const V1_ANALYTICS = "/v1/analytics"
 
@@ -14,7 +14,7 @@ export const getExerciseAnalytics = async (exerciseId: number, numOfMonthsBack: 
   return response.data
 }
 
-export const getRelativeStrengthByExercise = async (exerciseId: number, numOfMonthsBack: number) => {
+export const getRelativeStrengthByExercise = async (exerciseId: number, numOfMonthsBack: number): Promise<RelativeStrengthDto[]> => {
   const response = await apiClient.get(`${V1_ANALYTICS}/progress/relative-strength`,
     {
       params: {
