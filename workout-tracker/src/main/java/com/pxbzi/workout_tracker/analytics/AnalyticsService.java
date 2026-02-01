@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -140,10 +141,7 @@ public class AnalyticsService {
             .orElseThrow();
     }
 
-    public List<RelativeStrengthDto> getRelativeStrength(
-        int numMonthsBack,
-        Long exerciseId
-    ) {
+    public List<RelativeStrengthDto> getRelativeStrength(int numMonthsBack, Long exerciseId) {
         List<WeightDto> weights = weightService.getAllWeightsInDateRange(
             numMonthsBack
         );
@@ -165,7 +163,7 @@ public class AnalyticsService {
         }
 
         // Collect all unique dates from both weights and workouts
-        Set<LocalDate> allDates = new java.util.TreeSet<>();
+        Set<LocalDate> allDates = new TreeSet<>();
         allDates.addAll(weightMap.keySet());
         allDates.addAll(setMap.keySet());
 
@@ -201,12 +199,7 @@ public class AnalyticsService {
                 double oneRepMax = calculateEstimatedOneRepMax(workoutSet);
                 double weight = weightDto.weight();
                 double relativeStrength = (oneRepMax / weight) * 100;
-                return new RelativeStrengthDto(
-                    weight,
-                    oneRepMax,
-                    relativeStrength,
-                    date
-                );
+                return new RelativeStrengthDto(weight, oneRepMax, relativeStrength, date);
             })
             .filter(dto -> dto != null)
             .toList();
