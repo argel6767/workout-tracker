@@ -112,6 +112,12 @@ public class WorkoutService {
                 set.setWeight(dto.weight());
                 set.setReps(dto.reps());
             }
+            setsMap.remove(set.getId());
+        });
+        
+        setsMap.values().forEach(val -> {
+            WorkoutSet newSet = new WorkoutSet(workout, val.reps(), val.weight());
+            workout.getWorkoutSets().add(newSet);
         });
     }
 

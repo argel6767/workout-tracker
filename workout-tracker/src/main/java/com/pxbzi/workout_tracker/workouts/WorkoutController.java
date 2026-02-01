@@ -63,7 +63,7 @@ public class WorkoutController {
         return ResponseEntity.ok(updatedDto);
     }
 
-    @DeleteMapping()
+    @DeleteMapping("/{id}")
     public ResponseEntity<WorkoutDto> deleteWorkoutById(@PathVariable Long id) {
         workoutService.deleteWorkout(id);
         return ResponseEntity.noContent().build();

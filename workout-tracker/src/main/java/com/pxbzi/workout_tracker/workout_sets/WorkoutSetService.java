@@ -1,6 +1,5 @@
 package com.pxbzi.workout_tracker.workout_sets;
 
-import com.pxbzi.workout_tracker.exercises.models.Exercise;
 import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import lombok.Data;

@@ -57,10 +57,11 @@ public class ExerciseService {
                 .toList();
     }
 
-    public ExerciseDTO updateExercise(Long id, NewExerciseDto dto) {
+    public ExerciseDTO updateExercise(Long id, ExerciseDTO dto) {
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow();
-        mapMusclesWorked(exercise, dto);
+        exercise.setName(dto.name());
+        exercise.setDescription(dto.description());
         Exercise updatedExercise = exerciseRepository.save(exercise);
         return ExerciseDTO.getExerciseDTO(updatedExercise);
     }
