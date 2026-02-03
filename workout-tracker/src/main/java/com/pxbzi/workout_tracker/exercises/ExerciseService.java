@@ -5,12 +5,16 @@ import com.pxbzi.workout_tracker.exercises.models.ExerciseDTO;
 import com.pxbzi.workout_tracker.exercises.models.ExerciseMuscle;
 import com.pxbzi.workout_tracker.exercises.models.NewExerciseDto;
 import com.pxbzi.workout_tracker.muscles.models.Muscle;
+import com.pxbzi.workout_tracker.muscles.models.MuscleDto;
 import com.pxbzi.workout_tracker.muscles.MuscleRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -58,10 +62,14 @@ public class ExerciseService {
     }
 
     public ExerciseDTO updateExercise(Long id, ExerciseDTO dto) {
+        if (!id.equals(dto.id())) {
+            throw new IllegalArgumentException("Exercise ID mismatch");
+        }
         Exercise exercise = exerciseRepository.findById(id)
                 .orElseThrow();
         exercise.setName(dto.name());
         exercise.setDescription(dto.description());
+        mapMusclesWorked(exercise, dto);
         Exercise updatedExercise = exerciseRepository.save(exercise);
         return ExerciseDTO.getExerciseDTO(updatedExercise);
     }
@@ -76,6 +84,22 @@ public class ExerciseService {
         exercise.setName(dto.name());
         exercise.setDescription(dto.description());
         exercise.setMusclesWorked(exerciseMuscles);
+    }
+    
+    private void mapMusclesWorked(Exercise exercise, ExerciseDTO dto) {
+        List<ExerciseMuscle> exerciseMuscles = exercise.getMusclesWorked();
+        
+        Map<Long, ExerciseMuscle> muscleMap = exerciseMuscles.stream()
+            .collect(Collectors.toMap(exerciseMuscle -> exerciseMuscle.getMuscle().getId(), Function.identity()));
+        
+        for (MuscleDto muscleDto: dto.musclesWorked()) {
+            if (!muscleMap.containsKey(muscleDto.id())) {
+                Muscle muscle = muscleRepository.findById(muscleDto.id()).orElseThrow();
+                ExerciseMuscle exerciseMuscle = new ExerciseMuscle(exercise, muscle);
+                exerciseMuscles.add(exerciseMuscle);
+            }
+        }
+        
     }
 
 

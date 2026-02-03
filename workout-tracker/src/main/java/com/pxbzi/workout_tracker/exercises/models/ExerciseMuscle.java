@@ -25,7 +25,7 @@ public class ExerciseMuscle {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false, updatable = false)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "exercise_id", nullable = false)
