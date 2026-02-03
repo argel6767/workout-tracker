@@ -1,5 +1,5 @@
 import { apiClient } from "./apiConfig"
-import type { AnalyticsDto, ChatResponseDto, RelativeStrengthDto } from "../lib/analytics-dtos"
+import type { DataPoint, AnalyticsDto, ChatResponseDto, RelativeStrengthDto } from "../lib/analytics-dtos"
 
 const V1_ANALYTICS = "/v1/analytics"
 
@@ -32,5 +32,10 @@ export const getAiAnalysisByExercise = async (exerciseId: number): Promise<ChatR
         exerciseId
       }
     })
+  return response.data
+}
+
+export const getWorkoutsByMuscleGroup = async (): Promise<DataPoint<string, number>[]> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/progress/workouts-breakdown`)
   return response.data
 }

@@ -2,6 +2,7 @@ package com.pxbzi.workout_tracker.analytics;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pxbzi.workout_tracker.analytics.models.AnalyticsDto;
+import com.pxbzi.workout_tracker.analytics.models.DataPoint;
 import com.pxbzi.workout_tracker.analytics.models.RelativeStrengthDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleGroupDto;
@@ -32,6 +33,11 @@ public class AnalyticsController {
     @GetMapping("/progress/ai-analysis")
     public ChatResponseDto getAiAnalysisByExerciseId(@RequestParam Long exerciseId) throws JsonProcessingException {
         return analyticsService.analyzeExerciseProgression(exerciseId);
+    }
+    
+    @GetMapping("/progress/workouts-breakdown")
+    public List<DataPoint<String, Integer>> getWorkoutsByMuscleGroup() {
+        return analyticsService.aggregateWorkoutsByMuscle();
     }
 
     @GetMapping("/strongest-exercises/muscle-groups/{muscleGroup}")

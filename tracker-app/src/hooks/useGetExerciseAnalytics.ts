@@ -4,6 +4,9 @@ import { getExerciseAnalytics } from "../api/analytics"
 export const useGetExerciseAnalytics = (exerciseId: number, numOfMonthsBack: number) => {
   return useQuery({
     queryKey: ["exerciseAnalytics", exerciseId, numOfMonthsBack],
-    queryFn: async () => { return await getExerciseAnalytics(exerciseId, numOfMonthsBack) }
+    queryFn: async () => {
+      return await getExerciseAnalytics(exerciseId, numOfMonthsBack);
+    },
+    enabled: exerciseId > 0 && numOfMonthsBack > 0
   });
 }

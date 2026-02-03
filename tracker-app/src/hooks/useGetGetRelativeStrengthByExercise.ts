@@ -4,6 +4,7 @@ import { getRelativeStrengthByExercise } from "../api/analytics";
 export const useGetRelativeStrengthByExercise = (exerciseId: number, numOfMonthsBack: number) => {
   return useQuery({
     queryKey: ["relativeStrength", exerciseId, numOfMonthsBack],
-    queryFn: async () => {return await getRelativeStrengthByExercise(exerciseId, numOfMonthsBack)}
+    queryFn: async () => { return await getRelativeStrengthByExercise(exerciseId, numOfMonthsBack) },
+    enabled: exerciseId > 0 && numOfMonthsBack > 0
   })
 }

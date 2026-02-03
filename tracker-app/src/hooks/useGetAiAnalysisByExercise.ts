@@ -4,6 +4,7 @@ import { getAiAnalysisByExercise } from '../api/analytics';
 export const useGetAiAnalysisByExercise = (exerciseId: number) => {
   return useQuery({
     queryKey: ['aiAnalysis', exerciseId],
-    queryFn: async() => await getAiAnalysisByExercise(exerciseId)
+    queryFn: async () => await getAiAnalysisByExercise(exerciseId), 
+    enabled: exerciseId > 0
   })
 }

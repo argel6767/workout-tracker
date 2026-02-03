@@ -4,6 +4,7 @@ import { getWorkoutsByExercise } from '../api/workouts';
 export const useGetWorkoutsByExercise = (exerciseId: number) => {
   return useQuery({
     queryKey: ['workouts', exerciseId],
-    queryFn: async() => await getWorkoutsByExercise(exerciseId)
+    queryFn: async () => await getWorkoutsByExercise(exerciseId),
+    enabled: exerciseId > 0
   })
 }

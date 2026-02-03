@@ -1,14 +1,14 @@
 import type { MuscleGroup } from "./form-dtos";
 
-type DataPoint = {
-  date: string;
-  value: number;
+export type DataPoint<K, V> = {
+  key: K;
+  value: V;
 };
 
 export type AnalyticsDto = {
-  oneRepMaxes: DataPoint[];
-  avgWeightPerReps: DataPoint[];
-  totalVolumes: DataPoint[];
+  oneRepMaxes: DataPoint<string, number>[];
+  avgWeightPerReps: DataPoint<string, number>[];
+  totalVolumes: DataPoint<string, number>[];
 };
 
 export type RelativeStrengthDto = {

@@ -52,26 +52,26 @@ public class AnalyticsService {
             numOfMonthsBack
         );
 
-        List<DataPoint> oneRepMaxes = workouts
+        List<DataPoint<LocalDate, Double>> oneRepMaxes = workouts
             .stream()
             .map(workout ->
-                new DataPoint(
+                new DataPoint<>(
                     workout.getWorkoutDate(),
                     calculateEstimatedOneRepMax(getTopSet(workout))
                 )
             )
             .toList();
 
-        List<DataPoint> avgWeightPerReps = workouts
+        List<DataPoint<LocalDate, Double>> avgWeightPerReps = workouts
             .stream()
             .map(workout -> {
                 List<WorkoutSet> workoutSets = workout.getWorkoutSets();
                 double avgWeightPerRep = calculateAvgWeightPerRep(workoutSets);
-                return new DataPoint(workout.getWorkoutDate(), avgWeightPerRep);
+                return new DataPoint<>(workout.getWorkoutDate(), avgWeightPerRep);
             })
             .toList();
 
-        List<DataPoint> totalVolumes = workouts
+        List<DataPoint<LocalDate, Double>> totalVolumes = workouts
             .stream()
             .map(this::calculateTotalVolume)
             .toList();
@@ -228,6 +228,16 @@ public class AnalyticsService {
         String dtoStringfy = objectMapper.writeValueAsString(dto);
         return geminiService.getChatResponseDto(dtoStringfy);
     }
+    
+    public List<DataPoint<String, Integer>> aggregateWorkoutsByMuscle() {
+        List<WorkoutDto> workouts = workoutService.getAllWorkouts();
+        List<DataPoint<String, Integer>> dataPoints = workouts.stream()
+            .collect(Collectors.groupingBy(workout -> workout.exercise().primaryMuscleGroup(), Collectors.counting()))
+            .entrySet().stream()
+            .map(entry -> new DataPoint<>(entry.getKey(), entry.getValue().intValue()))
+            .toList();
+        return dataPoints;
+    }
 
     private WorkoutSet getTopSet(Workout workout) {
         return workout
@@ -237,7 +247,7 @@ public class AnalyticsService {
             .orElseThrow();
     }
 
-    private DataPoint calculateTotalVolume(Workout workout) {
+    private DataPoint<LocalDate, Double> calculateTotalVolume(Workout workout) {
         List<WorkoutSet> workoutSets = workout.getWorkoutSets();
         double volume = 0;
 
@@ -247,7 +257,7 @@ public class AnalyticsService {
                 : workoutSet.getWeight();
             volume += (workoutSet.getReps() * weight);
         }
-        return new DataPoint(workout.getWorkoutDate(), volume);
+        return new DataPoint<>(workout.getWorkoutDate(), volume);
     }
 
     private double calculateAvgWeightPerRep(List<WorkoutSet> workoutSets) {
