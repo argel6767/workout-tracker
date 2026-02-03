@@ -1,34 +1,24 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type {
   NewExerciseDto,
   NewMuscleDto,
   NewSetDto,
   NewWorkoutDto,
   NewWeightDto,
-  MuscleGroup,
 } from "../lib/form-dtos";
 import { useGetMuscles } from "../hooks/useGetMuscles";
-import { useGetExercises } from "../hooks/useGetExercises";
 import { createWorkout } from "../api/workouts";
 import { createMuscle } from "../api/muscles";
 import { createExercise } from "../api/exercise";
 import { createWeight } from "../api/weights";
 import { queryClient } from "../api/queryClient";
+import { ExerciseData } from "./exercise-data";
 
 export const WorkoutForm = () => {
   const [newWorkout, setNewWorkout] = useState<NewWorkoutDto>({
     exerciseId: -1,
     sets: [],
   });
-
-  const { data = [], isLoading, isError } = useGetExercises();
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>("CHEST");
-
-  const exercises = useMemo(() => {
-    return data.filter(
-      (exercise) => exercise.primaryMuscleGroup === muscleGroup,
-    );
-  }, [data, muscleGroup]);
 
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setNewWorkout((prev) => ({
@@ -60,10 +50,6 @@ export const WorkoutForm = () => {
     }));
   };
 
-  const handleMuscleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setMuscleGroup(e.target.value as MuscleGroup);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -79,10 +65,6 @@ export const WorkoutForm = () => {
     }
   };
 
-  if (isLoading)
-    return <span className="loading loading-dots loading-xl"></span>;
-  if (isError) return <div>Error loading table data</div>;
-
   return (
     <main>
       <h1 className="py-2 text-lg">Add a Workout</h1>
@@ -90,36 +72,9 @@ export const WorkoutForm = () => {
         className="flex flex-col gap-4 justify-center items-center"
         onSubmit={handleSubmit}
       >
-        <label className="input">
-          <span className="label">Muscle Group</span>
-          <select
-            value={muscleGroup}
-            onChange={handleMuscleGroupChange}
-            className="bg-base-200 rounded-lg p-1"
-          >
-            <option value="CHEST">Chest</option>
-            <option value="BACK">Back</option>
-            <option value="SHOULDERS">Shoulders</option>
-            <option value="LEGS">Legs</option>
-            <option value="ARMS">Arms</option>
-            <option value="CORE">Core</option>
-          </select>
-        </label>
-        <label className="input">
-          <span className="label">Exercise</span>
-          <select
-            value={newWorkout.exerciseId}
-            onChange={handleExerciseChange}
-            className="bg-base-200 rounded-lg p-1"
-          >
-            <option>Select</option>
-            {exercises!.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div>
+          <ExerciseData handleExerciseChange={handleExerciseChange}/>
+        </div>
 
         <fieldset className="w-full">
           <legend className="font-semibold mb-2">Sets</legend>
