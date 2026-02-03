@@ -13,6 +13,7 @@ import { createWorkout } from "../api/workouts";
 import { createMuscle } from "../api/muscles";
 import { createExercise } from "../api/exercise";
 import { createWeight } from "../api/weights";
+import { queryClient } from "../api/queryClient";
 
 export const WorkoutForm = () => {
   const [newWorkout, setNewWorkout] = useState<NewWorkoutDto>({
@@ -68,6 +69,7 @@ export const WorkoutForm = () => {
     try {
       const response = await createWorkout(newWorkout);
       console.log("Workout created:", response);
+      queryClient.clear();
       setNewWorkout({
         exerciseId: -1,
         sets: []
@@ -195,6 +197,7 @@ export const MuscleForm = () => {
     try {
       const response = await createMuscle(newMuscle);
       console.log("Muscle created:", response);
+      queryClient.clear();
       setNewMuscle({
         name: "",
         muscleGroup: "CHEST",
@@ -274,6 +277,7 @@ export const ExerciseForm = () => {
     try {
       const response = await createExercise(newExercise);
       console.log("Exercise created:", response);
+      queryClient.clear();
       setNewExercise({
         name: "",
         description: "",
@@ -351,6 +355,7 @@ export const WeightForm = () => {
     e.preventDefault();
     try {
       const response = await createWeight(newWeight);
+      queryClient.clear();
       console.log("Weight created:", response);
     } catch (error) {
       console.error("Error creating weight:", error);

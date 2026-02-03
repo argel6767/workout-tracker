@@ -38,7 +38,7 @@ export const ExerciseAnalytics = ({ exerciseId, numMonthsBack }: AnalyticsProps)
   }
 
   if (!exerciseAnalytics) {
-    return <div>No data available</div>;
+    return <h2 className="text-xl py-2 text-center">No data available. Pick an exercise</h2>;
   }
 
   const dataPointsMap = {
@@ -130,7 +130,7 @@ export const RelativeStrengthAnalytics = ({
   }
 
   if (!data || data.length === 0) {
-    return <div>No data available</div>;
+    return <h2 className="text-xl py-2 text-center">No data available. Pick an exercise</h2>;
   }
 
   return (
