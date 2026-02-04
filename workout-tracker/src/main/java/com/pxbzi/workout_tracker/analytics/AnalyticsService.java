@@ -252,8 +252,8 @@ public class AnalyticsService {
         double volume = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            double weight = workoutSet.getWeight().equals(0.0)
-                ? 1
+            double weight = workoutSet.getWeight().doubleValue() <= 0.0
+                ? getNewestWeightEntry() + workoutSet.getWeight()
                 : workoutSet.getWeight();
             volume += (workoutSet.getReps() * weight);
         }
@@ -265,8 +265,8 @@ public class AnalyticsService {
         int reps = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            double weight = workoutSet.getWeight().equals(0.0)
-                ? 1
+            double weight = workoutSet.getWeight().doubleValue() <= 0.0
+                ? getNewestWeightEntry() + workoutSet.getWeight()
                 : workoutSet.getWeight();
             volume += (workoutSet.getReps() * weight);
             reps += workoutSet.getReps();
@@ -276,8 +276,8 @@ public class AnalyticsService {
     }
 
     private double calculateEstimatedOneRepMax(WorkoutSet maxWorkoutSet) {
-        double weight = maxWorkoutSet.getWeight().equals(0.0)
-            ? 1
+        double weight = maxWorkoutSet.getWeight().doubleValue() <= 0.0
+            ? getNewestWeightEntry() + maxWorkoutSet.getWeight()
             : maxWorkoutSet.getWeight();
         return weight * (1 + ((double) maxWorkoutSet.getReps() / 30));
     }
@@ -286,5 +286,9 @@ public class AnalyticsService {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(numMonthsBack);
         return Pair.of(startDate, endDate);
+    }
+    
+    private double getNewestWeightEntry() {
+        return weightService.getNewestWeightEntry().weight();
     }
 }

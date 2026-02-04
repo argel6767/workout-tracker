@@ -1,5 +1,5 @@
 # Build stage
-FROM node:21-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN pnpm install
 RUN pnpm run build
 
 # Production stage
-FROM node:21-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
