@@ -22,6 +22,12 @@ public class WeightService {
         return WeightDto.getWeightDto(weight);
     }
 
+    public List<WeightDto> getAllWeights() {
+        return weightRepository.findAll().stream()
+                .map(WeightDto::getWeightDto)
+                .toList();
+    }
+
     public WeightDto getWeight(Long weightId) {
         Weight weight = weightRepository.findById(weightId)
                 .orElseThrow();

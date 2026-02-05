@@ -18,6 +18,11 @@ public class WeightController {
     public WeightDto createWeight(@RequestBody NewWeightDto weightDto) {
         return weightService.createWeight(weightDto);
     }
+    
+    @GetMapping()
+    public List<WeightDto> getAllWeights() {
+        return weightService.getAllWeights();
+    }
 
     @GetMapping("/{id}")
     public WeightDto getWeight(@PathVariable Long id) {
