@@ -6,8 +6,11 @@ import com.pxbzi.workout_tracker.exercises.models.ExerciseMuscle;
 import com.pxbzi.workout_tracker.exercises.models.NewExerciseDto;
 import com.pxbzi.workout_tracker.muscles.models.Muscle;
 import com.pxbzi.workout_tracker.muscles.models.MuscleDto;
+import com.pxbzi.workout_tracker.workouts.WorkoutRepository;
 import com.pxbzi.workout_tracker.muscles.MuscleRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Log
 public class ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
@@ -69,6 +73,7 @@ public class ExerciseService {
                 .orElseThrow();
         exercise.setName(dto.name());
         exercise.setDescription(dto.description());
+        exercise.setExerciseType(dto.exerciseType());
         mapMusclesWorked(exercise, dto);
         Exercise updatedExercise = exerciseRepository.save(exercise);
         return ExerciseDTO.getExerciseDTO(updatedExercise);
@@ -84,6 +89,7 @@ public class ExerciseService {
         exercise.setName(dto.name());
         exercise.setDescription(dto.description());
         exercise.setMusclesWorked(exerciseMuscles);
+        exercise.setExerciseType(dto.exerciseType());
     }
     
     private void mapMusclesWorked(Exercise exercise, ExerciseDTO dto) {

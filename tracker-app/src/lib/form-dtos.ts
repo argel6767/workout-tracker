@@ -1,7 +1,10 @@
+export type ExerciseType = "BODYWEIGHT" | "MACHINE" | "CABLE" | "FREE_WEIGHT";
+
 export type NewExerciseDto = {
   name: string;
   description: string;
   musclesWorked: number[];
+  exerciseType: ExerciseType;
 };
 
 export type MuscleGroup = "CHEST" | "BACK" | "LEGS" | "ARMS" | "CORE" | "SHOULDERS";

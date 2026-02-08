@@ -11,6 +11,8 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(indexes = {@Index(name = "idx_exercise_name", columnList = "name"),
+        @Index(name = "idx_exercise_type", columnList = "exercise_type")})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -25,6 +27,10 @@ public class Exercise {
     private String name;
 
     private String description;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "exercise_type")
+    private ExerciseType exerciseType;
 
     @OneToMany(mappedBy = "exercise",  cascade = CascadeType.ALL,  orphanRemoval = true)
     private List<ExerciseMuscle> musclesWorked;

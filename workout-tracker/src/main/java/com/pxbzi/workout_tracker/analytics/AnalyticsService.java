@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxbzi.workout_tracker.analytics.models.*;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+import com.pxbzi.workout_tracker.exercises.models.ExerciseType;
 import com.pxbzi.workout_tracker.gemini.GeminiService;
 import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
 import com.pxbzi.workout_tracker.gemini.models.ExerciseProgressionDto;
@@ -51,13 +52,15 @@ public class AnalyticsService {
             exerciseId,
             numOfMonthsBack
         );
+        
+        ExerciseType exerciseType = workouts.getLast().getExercise().getExerciseType();
 
         List<DataPoint<LocalDate, Double>> oneRepMaxes = workouts
             .stream()
             .map(workout ->
                 new DataPoint<>(
                     workout.getWorkoutDate(),
-                    calculateEstimatedOneRepMax(getTopSet(workout))
+                    calculateEstimatedOneRepMax(getTopSet(workout), exerciseType)
                 )
             )
             .toList();
@@ -66,14 +69,14 @@ public class AnalyticsService {
             .stream()
             .map(workout -> {
                 List<WorkoutSet> workoutSets = workout.getWorkoutSets();
-                double avgWeightPerRep = calculateAvgWeightPerRep(workoutSets);
+                double avgWeightPerRep = calculateAvgWeightPerRep(workoutSets, exerciseType);
                 return new DataPoint<>(workout.getWorkoutDate(), avgWeightPerRep);
             })
             .toList();
 
         List<DataPoint<LocalDate, Double>> totalVolumes = workouts
             .stream()
-            .map(this::calculateTotalVolume)
+            .map(workout -> calculateTotalVolume(workout, exerciseType))
             .toList();
 
         return new AnalyticsDto(oneRepMaxes, avgWeightPerReps, totalVolumes);
@@ -87,9 +90,8 @@ public class AnalyticsService {
             .stream()
             .max(Comparator.comparingDouble(WorkoutSet::getWeight))
             .orElseThrow();
-        double oneRepMax = calculateEstimatedOneRepMax(maxSet);
-
         Exercise exercise = maxSet.getWorkout().getExercise();
+        double oneRepMax = calculateEstimatedOneRepMax(maxSet, exercise.getExerciseType());
         return new StrongestExerciseByMuscleGroupDto(
             exercise.getId(),
             exercise.getName(),
@@ -120,11 +122,11 @@ public class AnalyticsService {
 
                 double maxE1RM = exerciseSets
                     .stream()
-                    .mapToDouble(this::calculateEstimatedOneRepMax)
+                    .mapToDouble(set -> calculateEstimatedOneRepMax(set, exercise.getExerciseType()))
                     .max()
                     .orElse(0);
 
-                double avgWeightPerRep = calculateAvgWeightPerRep(exerciseSets);
+                double avgWeightPerRep = calculateAvgWeightPerRep(exerciseSets, exercise.getExerciseType());
 
                 return new StrongestExerciseByMuscleDto(
                     exercise.getId(),
@@ -149,6 +151,8 @@ public class AnalyticsService {
             exerciseId,
             numMonthsBack
         );
+        
+        ExerciseType exerciseType = workouts.getLast().getExercise().getExerciseType();
 
         // Create navigable maps for weights and workout sets by date
         NavigableMap<LocalDate, WeightDto> weightMap = new TreeMap<>();
@@ -196,7 +200,7 @@ public class AnalyticsService {
                     return null;
                 }
 
-                double oneRepMax = calculateEstimatedOneRepMax(workoutSet);
+                double oneRepMax = calculateEstimatedOneRepMax(workoutSet, exerciseType);
                 double weight = weightDto.weight();
                 double relativeStrength = (oneRepMax / weight) * 100;
                 return new RelativeStrengthDto(weight, oneRepMax, relativeStrength, date);
@@ -247,12 +251,12 @@ public class AnalyticsService {
             .orElseThrow();
     }
 
-    private DataPoint<LocalDate, Double> calculateTotalVolume(Workout workout) {
+    private DataPoint<LocalDate, Double> calculateTotalVolume(Workout workout, ExerciseType exerciseType) {
         List<WorkoutSet> workoutSets = workout.getWorkoutSets();
         double volume = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            double weight = workoutSet.getWeight().doubleValue() <= 0.0
+            double weight = exerciseType == ExerciseType.BODYWEIGHT
                 ? getNewestWeightEntry() + workoutSet.getWeight()
                 : workoutSet.getWeight();
             volume += (workoutSet.getReps() * weight);
@@ -260,12 +264,12 @@ public class AnalyticsService {
         return new DataPoint<>(workout.getWorkoutDate(), volume);
     }
 
-    private double calculateAvgWeightPerRep(List<WorkoutSet> workoutSets) {
+    private double calculateAvgWeightPerRep(List<WorkoutSet> workoutSets, ExerciseType exerciseType) {
         double volume = 0;
         int reps = 0;
 
         for (WorkoutSet workoutSet : workoutSets) {
-            double weight = workoutSet.getWeight().doubleValue() <= 0.0
+            double weight = exerciseType == ExerciseType.BODYWEIGHT
                 ? getNewestWeightEntry() + workoutSet.getWeight()
                 : workoutSet.getWeight();
             volume += (workoutSet.getReps() * weight);
@@ -275,8 +279,8 @@ public class AnalyticsService {
         return volume / reps;
     }
 
-    private double calculateEstimatedOneRepMax(WorkoutSet maxWorkoutSet) {
-        double weight = maxWorkoutSet.getWeight().doubleValue() <= 0.0
+    private double calculateEstimatedOneRepMax(WorkoutSet maxWorkoutSet, ExerciseType exerciseType) {
+        double weight = exerciseType == ExerciseType.BODYWEIGHT
             ? getNewestWeightEntry() + maxWorkoutSet.getWeight()
             : maxWorkoutSet.getWeight();
         return weight * (1 + ((double) maxWorkoutSet.getReps() / 30));

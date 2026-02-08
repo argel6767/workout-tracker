@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Table(indexes = {@Index(name = "idx_muscle_name", columnList = "name"),
+        @Index(name = "idx_muscle_group", columnList = "muscle_group")})
 @NoArgsConstructor
 public class Muscle {
 
@@ -24,6 +26,7 @@ public class Muscle {
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "muscle_group")
     private MuscleGroup muscleGroup;
 
     LocalDateTime createdAt;

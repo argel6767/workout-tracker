@@ -8,7 +8,7 @@ type TableProps<T extends Record<string, unknown>> = {
 };
 
 export const TableContainer = () => {
-  const [exerciseId, setExerciseId] = useState<number>(1);
+  const [exerciseId, setExerciseId] = useState<number>(-1);
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setExerciseId(Number(e.target.value));
   };
@@ -19,7 +19,7 @@ export const TableContainer = () => {
     if (isLoading)
       return <span className="loading loading-dots loading-xl"></span>;
     if (isError) return <div>Error loading exercises</div>;
-    if (!data) return <div>No data found</div>;
+    if (!data || data.length === 0) return <div className="text-xl py-2 text-center">No data available. Pick an exercise</div>;
     return <Table data={data} />;
   };
 

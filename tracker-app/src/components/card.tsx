@@ -12,7 +12,7 @@ export const AiAnalysisCard = ({ exerciseId }: AiAnalysisCardProps) => {
   if (isError) return <div>Error fetching AI analysis</div>;
   
   if (!data)
-    return <div>No AI analysis available for given exercise</div>;
+    return <div>An exercise needs to be selected for AI analysis</div>;
   
   return (
     <div className="card card-border bg-base-100">

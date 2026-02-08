@@ -5,6 +5,7 @@ import type {
   NewSetDto,
   NewWorkoutDto,
   NewWeightDto,
+  ExerciseType
 } from "../lib/form-dtos";
 import { useGetMuscles } from "../hooks/useGetMuscles";
 import { createWorkout } from "../api/workouts";
@@ -206,6 +207,7 @@ export const ExerciseForm = () => {
     name: "",
     description: "",
     musclesWorked: [],
+    exerciseType: "BODYWEIGHT"
   });
 
   const { data: availableMuscles, isLoading, isError } = useGetMuscles();
@@ -226,6 +228,10 @@ export const ExerciseForm = () => {
         : [...prev.musclesWorked, muscleId],
     }));
   };
+  
+  const handleExerciseTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewExercise((prev) => ({ ...prev, exerciseType: e.target.value as ExerciseType }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,6 +243,7 @@ export const ExerciseForm = () => {
         name: "",
         description: "",
         musclesWorked: [],
+        exerciseType: "BODYWEIGHT"
       });
     } catch (error) {
       console.error("Error creating exercise:", error);
@@ -274,6 +281,19 @@ export const ExerciseForm = () => {
             value={newExercise.description}
             onChange={handleDescriptionChange}
           />
+        </label>
+        <label className="input">
+          <span className="label">Exercise Type</span>
+          <select
+            value={newExercise.exerciseType}
+            onChange={handleExerciseTypeChange}
+            className="bg-base-200 rounded-lg p-1"
+          >
+            <option value={"BODYWEIGHT"}>Bodyweight</option>
+            <option value={"MACHINE"}>Machine</option>
+            <option value={"CABLE"}>Cable</option>
+            <option value={"FREE_WEIGHT"}>Free Weight</option>
+          </select>
         </label>
         <fieldset className="grid grid-cols-3 gap-4">
           <legend className="label text-lg">Muscles Worked</legend>

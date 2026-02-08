@@ -6,7 +6,7 @@ import { WorkoutBreakdownPieChart } from "./piecharts";
 type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown";
 
 export const AnalyticsContainer = () => {
-  const [exerciseId, setExerciseId] = useState<number>(1);
+  const [exerciseId, setExerciseId] = useState<number>(-1);
   const [numMonthsBack, setNumberMonthsBack] = useState<number>(2);
   const [analyticType, setAnalyticType] = useState<AnalyticType>("general");
 
