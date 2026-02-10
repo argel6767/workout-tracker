@@ -38,7 +38,7 @@ public class TokenRefreshService {
         String subject = jwtService.extractSubject(refreshToken);
 
         // Generate a new token pair (both access and refresh for token rotation)
-        return jwtService.generateTokenPair(subject);
+        return jwtService.generateTokenPair(Long.parseLong(subject));
     }
 
     private String extractRefreshTokenFromCookies(HttpServletRequest request) {
