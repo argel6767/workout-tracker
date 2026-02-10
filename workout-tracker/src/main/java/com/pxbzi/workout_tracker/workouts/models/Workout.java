@@ -1,6 +1,7 @@
 package com.pxbzi.workout_tracker.workouts.models;
 
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+import com.pxbzi.workout_tracker.user.User;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
     indexes = {
         @Index(name = "idx_workout_exercise_id", columnList = "exercise_id"),
         @Index(name = "idx_workout_date", columnList = "workout_date"),
+        @Index(name = "idx_workout_user_id", columnList = "user_id")
     }
 )
 @Data
@@ -24,6 +26,10 @@ public class Workout {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    
+    @ManyToOne()
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "exercise_id")

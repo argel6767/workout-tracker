@@ -5,10 +5,12 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.pxbzi.workout_tracker.user.User;
 
 @Entity
 @Table( indexes = {
-        @Index(name = "idx_entry_date", columnList = "entry_date")
+        @Index(name = "idx_entry_date", columnList = "entry_date"),
+        @Index(name = "idx_weight_user_id", columnList = "user_id")
 })
 @Data
 public class Weight {
@@ -17,6 +19,10 @@ public class Weight {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false, unique = true)
     private Long id;
+    
+    @ManyToOne()
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private Double weight;
 
