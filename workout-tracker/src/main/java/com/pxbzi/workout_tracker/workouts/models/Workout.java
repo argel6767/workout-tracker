@@ -1,7 +1,7 @@
 package com.pxbzi.workout_tracker.workouts.models;
 
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
-import com.pxbzi.workout_tracker.user.User;
+import com.pxbzi.workout_tracker.user.models.User;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
 import jakarta.persistence.*;
 import java.time.LocalDate;

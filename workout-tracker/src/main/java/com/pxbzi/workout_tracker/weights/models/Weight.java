@@ -5,7 +5,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import com.pxbzi.workout_tracker.user.User;
+
+import com.pxbzi.workout_tracker.user.models.User;
 
 @Entity
 @Table( indexes = {

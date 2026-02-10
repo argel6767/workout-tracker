@@ -1,7 +1,8 @@
 package com.pxbzi.workout_tracker.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,33 +15,42 @@ import com.pxbzi.workout_tracker.jwt.JwtService;
 import com.pxbzi.workout_tracker.jwt.TokenRefreshService;
 import com.pxbzi.workout_tracker.jwt.TokenResponse;
 
+import org.springframework.web.bind.annotation.RequestBody;
+import com.pxbzi.workout_tracker.user.UserDto;
+import com.pxbzi.workout_tracker.auth.models.AuthenticationDto;
+import com.pxbzi.workout_tracker.auth.models.RegistrationDto;
+
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
+@Data
 public class AuthController {
 
     private final JwtService jwtService;
     private final CookieService cookieService;
     private final TokenRefreshService tokenRefreshService;
+    private final AuthService authService;
+    
+    @PostMapping("/login")
+    public ResponseEntity<UserDto> register(@RequestBody RegistrationDto registrationDto) {
+        UserDto newUser = authService.registerUser(registrationDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(newUser);
+    }
 
     /**
-     * Example login endpoint - you'll need to implement actual authentication
      * 
      * POST /auth/login with credentials
      * Returns access_token and refresh_token as HttpOnly cookies
      */
     @PostMapping("/login")
-    public ResponseEntity<String> login(/* Add your LoginRequest DTO here */) {
-        // TODO: Validate credentials against your user database
-        // TODO: Get username from authenticated user
-        String username = "exampleUser"; // Replace with actual username
-        
-        TokenResponse tokens = jwtService.generateTokenPair(username);
+    public ResponseEntity<UserDto> login(@RequestBody AuthenticationDto authenticationDto) {
+        UserDto userDto = authService.authenticateUser(authenticationDto);
+        TokenResponse tokens = jwtService.generateTokenPair(userDto.id(), UserDto.dtoToClaims(userDto));
 
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookieService.createAccessTokenCookie(tokens.accessToken()).toString())
             .header(HttpHeaders.SET_COOKIE, cookieService.createRefreshTokenCookie(tokens.refreshToken()).toString())
-            .body("Login successful");
+            .body(userDto);
     }
 
     /**

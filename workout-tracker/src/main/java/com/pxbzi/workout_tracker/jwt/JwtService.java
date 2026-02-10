@@ -35,7 +35,7 @@ public class JwtService {
 
     // ── Token Generation ───────────────────────────────────────────────
 
-    public String generateAccessToken(String subject) {
+    public String generateAccessToken(Long subject) {
         return buildToken(
             subject,
             Map.of("type", "access"),
@@ -44,7 +44,7 @@ public class JwtService {
     }
 
     public String generateAccessToken(
-        String subject,
+        Long subject,
         Map<String, Object> extraClaims
     ) {
         var claims = new java.util.HashMap<>(extraClaims);
@@ -52,7 +52,7 @@ public class JwtService {
         return buildToken(subject, claims, accessTokenExpiration);
     }
 
-    public String generateRefreshToken(String subject) {
+    public String generateRefreshToken(Long subject) {
         return buildToken(
             subject,
             Map.of("type", "refresh"),
@@ -60,7 +60,7 @@ public class JwtService {
         );
     }
 
-    public TokenResponse generateTokenPair(String subject) {
+    public TokenResponse generateTokenPair(Long subject) {
         return new TokenResponse(
             generateAccessToken(subject),
             generateRefreshToken(subject)
@@ -68,7 +68,7 @@ public class JwtService {
     }
 
     public TokenResponse generateTokenPair(
-        String subject,
+        Long subject,
         Map<String, Object> extraClaims
     ) {
         return new TokenResponse(
@@ -164,14 +164,14 @@ public class JwtService {
     }
 
     private String buildToken(
-        String subject,
+        Long subject,
         Map<String, Object> claims,
         long expirationMs
     ) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
             .claims(claims)
-            .subject(subject)
+            .subject(String.valueOf(subject))
             .issuedAt(new Date(now))
             .expiration(new Date(now + expirationMs))
             .signWith(signingKey)
