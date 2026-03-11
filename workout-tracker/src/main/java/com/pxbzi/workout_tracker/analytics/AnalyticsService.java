@@ -41,7 +41,7 @@ public class AnalyticsService {
     private final WeightService weightService;
     private final GeminiService geminiService;
     private final ObjectMapper objectMapper;
-    private static final int AGE = 23;
+    private static final int AGE = 24;
     private static final String SEX = "male";
 
     public AnalyticsDto getWorkoutAnalyticsByExerciseId(
