@@ -52,7 +52,7 @@ public class WorkoutService {
                 .map(WorkoutDto::getWorkoutDto)
                 .toList();
     }
-    
+
     public List<WorkoutDto> getWorkoutsByExercise(Long exerciseId) {
         List<Workout> workouts = workoutRepository.findByExercise(exerciseId);
         return workouts.stream()
@@ -65,11 +65,11 @@ public class WorkoutService {
                 .orElseThrow();
         return WorkoutDto.getWorkoutDto(workout);
     }
-    
+
     public WorkoutDto updateWorkout(Long workoutId, WorkoutDto workoutDto) {
         Workout workout = workoutRepository.findById(workoutId)
                 .orElseThrow();
-        
+
         Exercise exercise = exerciseService.getExerciseEntity(workoutDto.exercise().id());
         workout.setExercise(exercise);
         mapWorkoutSets(workoutDto.sets(), workout);
@@ -101,11 +101,11 @@ public class WorkoutService {
         LocalDate startDate = endDate.minusMonths(numOfMonthsBack);
         return workoutRepository.findByExerciseAndDateRange(exerciseId, startDate, endDate);
     }
-    
+
     private void mapWorkoutSets(List<SetDto> sets, Workout workout) {
         Map<Long, SetDto> setsMap = sets.stream()
                 .collect(Collectors.toMap(SetDto::id, Function.identity()));
-        
+
         workout.getWorkoutSets().forEach(set -> {
             SetDto dto = setsMap.get(set.getId());
             if (dto != null) {
@@ -114,7 +114,7 @@ public class WorkoutService {
             }
             setsMap.remove(set.getId());
         });
-        
+
         setsMap.values().forEach(val -> {
             WorkoutSet newSet = new WorkoutSet(workout, val.reps(), val.weight());
             workout.getWorkoutSets().add(newSet);

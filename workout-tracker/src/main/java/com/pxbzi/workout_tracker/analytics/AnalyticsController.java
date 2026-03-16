@@ -11,6 +11,7 @@ import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Month;
 import java.util.List;
 
 @RestController
@@ -38,6 +39,16 @@ public class AnalyticsController {
     @GetMapping("/progress/workouts-breakdown")
     public List<DataPoint<String, Integer>> getWorkoutsByMuscleGroup() {
         return analyticsService.aggregateWorkoutsByMuscle();
+    }
+    
+    @GetMapping("/progress/sets-breakdown")
+    public List<DataPoint<String, Integer>> getSetsByMuscleGroup() {
+        return analyticsService.aggregateSetsByMuscle();
+    }
+    
+    @GetMapping("/progress/volume-breakdown")
+    public List<DataPoint<String, Double>> getTotalVolumeByMuscleGroup() {
+        return analyticsService.aggregateTotalVolumeByMonth();
     }
 
     @GetMapping("/strongest-exercises/muscle-groups/{muscleGroup}")

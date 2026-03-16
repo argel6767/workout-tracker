@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxbzi.workout_tracker.analytics.models.*;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+import com.pxbzi.workout_tracker.exercises.models.ExerciseDTO;
 import com.pxbzi.workout_tracker.exercises.models.ExerciseType;
 import com.pxbzi.workout_tracker.gemini.GeminiService;
 import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
@@ -18,14 +19,19 @@ import com.pxbzi.workout_tracker.workouts.WorkoutService;
 import com.pxbzi.workout_tracker.workouts.models.Workout;
 import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.util.Pair;
@@ -152,7 +158,7 @@ public class AnalyticsService {
             numMonthsBack
         );
         
-        ExerciseType exerciseType = workouts.getLast().getExercise().getExerciseType();
+        ExerciseType exerciseType = workouts.getFirst().getExercise().getExerciseType();
 
         // Create navigable maps for weights and workout sets by date
         NavigableMap<LocalDate, WeightDto> weightMap = new TreeMap<>();
@@ -242,6 +248,39 @@ public class AnalyticsService {
             .toList();
         return dataPoints;
     }
+    
+    public List<DataPoint<String, Integer>> aggregateSetsByMuscle() {
+        List<WorkoutSet> workoutSets = workoutSetRepository.findAll();
+        List<DataPoint<String, Integer>> dataPoints = workoutSets.stream()
+            .collect(Collectors.groupingBy(workoutSet -> {
+                WorkoutSet set = (WorkoutSet) workoutSet;
+                Exercise exercise = set.getWorkout().getExercise();
+                MuscleGroup primaryMuscleGroup = ExerciseDTO.findPrimaryMuscleGroup(exercise);
+                return primaryMuscleGroup.name();
+            }, Collectors.counting()))
+            .entrySet().stream()
+            .map(entry -> new DataPoint<>(entry.getKey(), entry.getValue().intValue()))
+            .toList();
+        return dataPoints;
+    }
+    
+    public List<DataPoint<String, Double>> aggregateTotalVolumeByMonth() {
+        List<WorkoutDto> workouts = workoutService.getAllWorkouts();
+    
+        return workouts.stream()
+            .collect(Collectors.groupingBy(
+                workout -> YearMonth.from(workout.workoutDate()),
+                Collectors.summingDouble(workout -> calculateTotalVolume(workout, workout.exercise().exerciseType()))
+            ))
+            .entrySet().stream()
+            .sorted(Map.Entry.comparingByKey())
+            .map(entry -> new DataPoint<>(
+                entry.getKey().getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) 
+                    + " " + entry.getKey().getYear(),
+                entry.getValue()
+            ))
+            .toList();
+    }
 
     private WorkoutSet getTopSet(Workout workout) {
         return workout
@@ -262,6 +301,19 @@ public class AnalyticsService {
             volume += (workoutSet.getReps() * weight);
         }
         return new DataPoint<>(workout.getWorkoutDate(), volume);
+    }
+    
+    private double calculateTotalVolume(WorkoutDto workout, ExerciseType exerciseType) {
+        List<SetDto> sets = workout.sets();
+        double volume = 0;
+
+        for (SetDto set : sets) {
+            double weight = exerciseType == ExerciseType.BODYWEIGHT
+                ? getNewestWeightEntry() + set.weight()
+                : set.weight();
+            volume += (set.reps() * weight);
+        }
+        return volume;
     }
 
     private double calculateAvgWeightPerRep(List<WorkoutSet> workoutSets, ExerciseType exerciseType) {
