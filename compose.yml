@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:16
-    container_name: workout-tracker-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -20,7 +19,6 @@ services:
     build:
       context: ./workout-tracker
       dockerfile: Dockerfile
-    container_name: workout-tracker-api
     env_file: ./workout-tracker/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/workout_tracker
@@ -37,7 +35,6 @@ services:
     build:
       context: ./tracker-app
       dockerfile: Dockerfile
-    container_name: workout-tracker-app
     ports:
       - "5173:5173"
     depends_on:

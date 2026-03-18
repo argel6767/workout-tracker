@@ -13,7 +13,7 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findByWorkoutDate(LocalDate workoutDate);
 
     List<Workout> findByWorkoutDateBetween(LocalDate startDate, LocalDate endDate);
-    
+
     @Query("SELECT w FROM Workout w " +
             "WHERE w.exercise.id = :exerciseId " +
             "ORDER BY w.workoutDate DESC")
@@ -22,7 +22,7 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     @Query("SELECT w FROM Workout w " +
             "WHERE w.exercise.id = :exerciseId " +
             "AND w.workoutDate BETWEEN :startDate AND :endDate " +
-            "ORDER BY w.workoutDate DESC")
+            "ORDER BY w.workoutDate ASC")
     List<Workout> findByExerciseAndDateRange(Long exerciseId, LocalDate startDate, LocalDate endDate);
 
     @Query("SELECT w FROM Workout w " +
