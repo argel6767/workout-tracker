@@ -226,10 +226,17 @@ public class AnalyticsService {
             .stream()
             .max(Comparator.comparingDouble(SetDto::weight))
             .orElseThrow();
+            
+            List<WorkoutDto> lastMonthsWorkouts = workoutService.getWorkoutsByExerciseId(exerciseId, 1)
+                                                    .stream()
+                                                    .map(WorkoutDto::getWorkoutDto)
+                                                    .toList();
+                                                    
         ExerciseProgressionDto dto =
             ExerciseProgressionDto.getExerciseProgressionDto(
                 workout,
                 topSet,
+                lastMonthsWorkouts,
                 weight,
                 AGE,
                 SEX
