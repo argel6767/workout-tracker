@@ -11,7 +11,9 @@ import com.pxbzi.workout_tracker.muscles.MuscleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,9 @@ public class ExerciseService {
     private final MuscleRepository muscleRepository;
 
     public ExerciseDTO createExercise(NewExerciseDto dto) {
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required request body is null");
+        }
         Exercise exercise = new Exercise();
         mapMusclesWorked(exercise, dto);
         Exercise newExercise = exerciseRepository.save(exercise);
@@ -84,11 +89,20 @@ public class ExerciseService {
     }
 
     private void mapMusclesWorked(Exercise exercise, NewExerciseDto dto) {
+        if (dto.musclesWorked() == null || dto.musclesWorked().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required muscle id's are missing");
+        }
         List<Muscle> musclesWorked= muscleRepository.findAllById(dto.musclesWorked());
         List<ExerciseMuscle> exerciseMuscles = musclesWorked.stream().map(muscle -> new ExerciseMuscle(exercise, muscle)).toList();
+        if (dto.name() == null || dto.name().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required name is missing");
+        }
         exercise.setName(dto.name());
-        exercise.setDescription(dto.description());
+        exercise.setDescription(dto.description() == null ? "" : dto.description());
         exercise.setMusclesWorked(exerciseMuscles);
+        if (dto.exerciseType() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required exercise type is missing");
+        }
         exercise.setExerciseType(dto.exerciseType());
     }
     

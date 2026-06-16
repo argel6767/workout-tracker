@@ -9,7 +9,10 @@ import com.pxbzi.workout_tracker.workouts.models.Workout;
 import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -123,12 +126,23 @@ public class WorkoutService {
 
     private Workout mapWorkout(NewWorkoutDto newWorkoutDto) {
         Workout workout = new Workout();
+        if (newWorkoutDto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "required request body is null");
+        }
+        if (newWorkoutDto.exerciseId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "required exerciseId is null");
+        }
+        
         Exercise exercise = exerciseService.getExerciseEntity(newWorkoutDto.exerciseId());
         workout.setExercise(exercise);
+        if (newWorkoutDto.sets() == null || newWorkoutDto.sets().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No sets provided");
+        }
         List<WorkoutSet> workoutSets = newWorkoutDto.sets().stream()
                 .map(set -> new WorkoutSet(workout, set.reps(), set.weight()))
                 .toList();
         workout.setWorkoutSets(workoutSets);
+        workout.setWorkoutDate(newWorkoutDto.workoutDate());
         return workout;
     }
 }

@@ -4,7 +4,10 @@ import com.pxbzi.workout_tracker.weights.models.NewWeightDto;
 import com.pxbzi.workout_tracker.weights.models.Weight;
 import com.pxbzi.workout_tracker.weights.models.WeightDto;
 import lombok.Data;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,9 +19,17 @@ public class WeightService {
     private final WeightRepository weightRepository;
 
     public WeightDto createWeight(NewWeightDto weightDto) {
+        if (weightDto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required request body is missing");
+        }
         Weight weight = new Weight();
+        if (weightDto.weight() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required weight is missing");
+        }
+        
         weight.setWeight(weightDto.weight());
-        weight =  weightRepository.save(weight);
+        weight.setEntryDate(weightDto.entryDate());
+        weight = weightRepository.save(weight);
         return WeightDto.getWeightDto(weight);
     }
 

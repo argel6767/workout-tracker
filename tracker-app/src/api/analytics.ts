@@ -39,3 +39,8 @@ export const getWorkoutsByMuscleGroup = async (): Promise<DataPoint<string, numb
   const response = await apiClient.get(`${V1_ANALYTICS}/progress/workouts-breakdown`)
   return response.data
 }
+
+export const getSetsByMuscleGroup = async (): Promise<DataPoint<string, number>[]> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/progress/sets-breakdown`)
+  return response.data
+}

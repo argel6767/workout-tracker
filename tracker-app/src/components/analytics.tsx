@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ExerciseData } from "./exercise-data";
 import { ExerciseAnalytics, RelativeStrengthAnalytics, WeightAnalytics } from "./linegraphs";
-import { WorkoutBreakdownPieChart } from "./piecharts";
+import { SetsByMuscleGroupPieChart, WorkoutBreakdownPieChart } from "./piecharts";
 
-type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown";
+type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown";
 
 export const AnalyticsContainer = () => {
   const [exerciseId, setExerciseId] = useState<number>(-1);
@@ -45,6 +45,7 @@ export const AnalyticsContainer = () => {
             <option value="relativeStrength">Relative Strength</option>
             <option value="weight">Weight</option>
             <option value="workoutBreakdown">Workout Breakdown</option>
+            <option value="setBreakdown">Set Breakdown</option>
           </select>
         </label>
 
@@ -107,9 +108,9 @@ const AnalyticDisplay = ({ exerciseId, numMonthsBack, analyticType }: AnalyticDi
       <WorkoutBreakdownPieChart />
     );
   }
-  if (analyticType === "workoutBreakdown") {
+  if (analyticType === "setBreakdown") {
     return (
-      <WorkoutBreakdownPieChart />
+      <SetsByMuscleGroupPieChart />
     );
   }
 }

@@ -14,11 +14,13 @@ import { createExercise } from "../api/exercise";
 import { createWeight } from "../api/weights";
 import { queryClient } from "../api/queryClient";
 import { ExerciseData } from "./exercise-data";
+import { EntryDateForm } from "./entry-date";
 
 export const WorkoutForm = () => {
   const [newWorkout, setNewWorkout] = useState<NewWorkoutDto>({
     exerciseId: -1,
     sets: [],
+    workoutDate: null
   });
 
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -50,16 +52,27 @@ export const WorkoutForm = () => {
       ),
     }));
   };
+  
+  const onDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewWorkout((prev) => ({
+      ...prev,
+      workoutDate: e.target.value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (newWorkout.workoutDate === "") {
+        newWorkout.workoutDate = null;
+      }
       const response = await createWorkout(newWorkout);
       console.log("Workout created:", response);
       queryClient.clear();
       setNewWorkout({
         exerciseId: -1,
-        sets: []
+        sets: [],
+        workoutDate: ""
       })
     } catch (error) {
       console.error("Error creating workout:", error);
@@ -122,6 +135,7 @@ export const WorkoutForm = () => {
             + Add Set
           </button>
         </fieldset>
+        <EntryDateForm date={newWorkout.workoutDate} onDateChange={onDateChange} />
 
         <button type="submit" className="btn btn-primary">
           Add Workout
@@ -320,22 +334,35 @@ export const ExerciseForm = () => {
 export const WeightForm = () => {
   const [newWeight, setNewWeight] = useState<NewWeightDto>({
     weight: 0,
+    entryDate: null,
   });
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewWeight((prev) => ({ ...prev, weight: Number(e.target.value) }));
   };
+  
+  const onDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewWeight((prev) => ({ ...prev, entryDate: e.target.value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (newWeight.entryDate === "") {
+        newWeight.entryDate = null;
+      }
       const response = await createWeight(newWeight);
       queryClient.clear();
+      setNewWeight({
+        weight: 0,
+        entryDate: "",
+      });
       console.log("Weight created:", response);
     } catch (error) {
       console.error("Error creating weight:", error);
     }
   };
+
 
   return (
     <main>
@@ -355,6 +382,7 @@ export const WeightForm = () => {
             step={0.1}
           />
         </label>
+        <EntryDateForm onDateChange={onDateChange}  date={newWeight.entryDate}/>
         <button type="submit" className="btn btn-primary">
           Add Weight
         </button>

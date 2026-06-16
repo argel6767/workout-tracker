@@ -1,5 +1,7 @@
 import { PieChart, Pie, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { useGetWorkoutsByMuscleGroup } from '../hooks/useGetWorkoutsByMuscleGroup';
+import { useGetSetsByMuscleGroup } from '../hooks/useGetSetsByMuscleGroup';
+
 
 export const WorkoutBreakdownPieChart = () => {
   const { data, isLoading, isError } = useGetWorkoutsByMuscleGroup()
@@ -20,6 +22,30 @@ export const WorkoutBreakdownPieChart = () => {
   return (
     <main className='py-2'>
       <h2 className='text-2xl text-center'>All Workouts Broken Down by Muscle Groups</h2>
+      <PieGraph data={data} dataKey="value" nameKey='key'/>
+    </main>
+  )
+}
+
+export const SetsByMuscleGroupPieChart = () => {
+  const { data, isLoading, isError } = useGetSetsByMuscleGroup()
+  
+  if (isLoading) {
+    return <span className="loading loading-dots loading-xl"></span>;
+  }
+
+  if (isError) {
+    return <div>Error loading analytics</div>;
+  }
+
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
+  }
+  
+  
+  return (
+    <main className='py-2'>
+      <h2 className='text-2xl text-center'>All Sets Broken Down by Muscle Groups</h2>
       <PieGraph data={data} dataKey="value" nameKey='key'/>
     </main>
   )
@@ -70,7 +96,7 @@ const PieGraph = <T extends Record<string, unknown>>({ data, dataKey, nameKey }:
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={({ name, value }) => `${name}: ${value}`}
+            label={({ name, value, percent }) => `${name}: ${value} (${(percent! * 100).toFixed(1)}%)`}
             outerRadius={80}
             fill="#8884d8"
           dataKey={dataKey}

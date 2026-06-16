@@ -1,4 +1,5 @@
 export type ExerciseType = "BODYWEIGHT" | "MACHINE" | "CABLE" | "FREE_WEIGHT";
+export type Optional<T> = T | null;
 
 export type NewExerciseDto = {
   name: string;
@@ -22,6 +23,7 @@ export type NewSetDto = {
 export type NewWorkoutDto = {
   exerciseId: number;
   sets: NewSetDto[];
+  workoutDate: Optional<string>;
 };
 
 export type MuscleDto = {
@@ -53,6 +55,7 @@ export type WorkoutDto = {
 
 export type NewWeightDto = {
   weight: number;
+  entryDate: Optional<string>;
 };
 
 export type WeightDto = {

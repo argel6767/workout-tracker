@@ -31,7 +31,9 @@ public class Weight {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
-        this.entryDate = LocalDate.now();
+        if (this.entryDate == null) {
+            this.entryDate = LocalDate.now();
+        }
     }
 
     @PreUpdate
