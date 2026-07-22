@@ -2,6 +2,7 @@ package com.pxbzi.workout_tracker.workouts;
 
 import com.pxbzi.workout_tracker.exercises.ExerciseService;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
+import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import com.pxbzi.workout_tracker.workouts.models.NewWorkoutDto;
 import com.pxbzi.workout_tracker.workout_sets.models.SetDto;
 import com.pxbzi.workout_tracker.workout_sets.models.WorkoutSet;
@@ -54,6 +55,22 @@ public class WorkoutService {
         return workoutRepository.findAll().stream()
                 .map(WorkoutDto::getWorkoutDto)
                 .toList();
+    }
+
+    public List<Workout> getWorkoutsByMuscleAndDateRange(
+            Long muscleId,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        return workoutRepository.findByMuscleAndDateRange(muscleId, startDate, endDate);
+    }
+
+    public List<Workout> getWorkoutsByMuscleGroupAndDateRange(
+            MuscleGroup muscleGroup,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        return workoutRepository.findByMuscleGroupAndDateRange(muscleGroup, startDate, endDate);
     }
 
     public List<WorkoutDto> getWorkoutsByExercise(Long exerciseId) {

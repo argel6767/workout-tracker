@@ -10,6 +10,8 @@ import com.pxbzi.workout_tracker.gemini.GeminiService;
 import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
 import com.pxbzi.workout_tracker.gemini.models.ExerciseProgressionDto;
 import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
+import com.pxbzi.workout_tracker.muscles.MuscleService;
+import com.pxbzi.workout_tracker.muscles.models.MuscleDto;
 import com.pxbzi.workout_tracker.weights.WeightService;
 import com.pxbzi.workout_tracker.weights.models.WeightDto;
 import com.pxbzi.workout_tracker.workout_sets.WorkoutSetRepository;
@@ -19,9 +21,12 @@ import com.pxbzi.workout_tracker.workouts.WorkoutService;
 import com.pxbzi.workout_tracker.workouts.models.Workout;
 import com.pxbzi.workout_tracker.workouts.models.WorkoutDto;
 import java.time.LocalDate;
+import java.time.DayOfWeek;
+import java.time.temporal.TemporalAdjusters;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,6 +52,7 @@ public class AnalyticsService {
     private final WeightService weightService;
     private final GeminiService geminiService;
     private final ObjectMapper objectMapper;
+    private final MuscleService muscleService;
     private static final int AGE = 24;
     private static final String SEX = "male";
 
@@ -287,6 +293,176 @@ public class AnalyticsService {
                 entry.getValue()
             ))
             .toList();
+    }
+
+    public WeeklyVolumeAnalysisDto getWeeklyVolumeAnalysis(
+            Long muscleId,
+            MuscleGroup muscleGroup,
+            LocalDate date,
+            Integer numWeeksBack
+    ) {
+        if ((muscleId == null) == (muscleGroup == null)) {
+            throw new IllegalArgumentException("Provide either muscleId or muscleGroup, but not both");
+        }
+        if (numWeeksBack == null || numWeeksBack < 1) {
+            throw new IllegalArgumentException("numWeeksBack must be at least 1");
+        }
+
+        String targetName;
+        if (muscleId != null) {
+            MuscleDto muscle = muscleService.getMuscle(muscleId);
+            targetName = muscle.name();
+        } else {
+            targetName = muscleGroup.name();
+        }
+
+        LocalDate currentStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate currentEnd = currentStart.plusDays(6);
+        LocalDate earliestStart = currentStart.minusWeeks(numWeeksBack);
+        List<Workout> workouts = muscleId != null
+                ? workoutService.getWorkoutsByMuscleAndDateRange(muscleId, earliestStart, currentEnd)
+                : workoutService.getWorkoutsByMuscleGroupAndDateRange(muscleGroup, earliestStart, currentEnd);
+
+        List<WeeklyVolumeDto> weeks = new ArrayList<>();
+        for (int weeksAgo = numWeeksBack; weeksAgo >= 0; weeksAgo--) {
+            LocalDate weekStart = currentStart.minusWeeks(weeksAgo);
+            LocalDate weekEnd = weekStart.plusDays(6);
+            List<Workout> weeklyWorkouts = workouts.stream()
+                    .filter(workout -> !workout.getWorkoutDate().isBefore(weekStart)
+                            && !workout.getWorkoutDate().isAfter(weekEnd))
+                    .toList();
+            weeks.add(toWeeklyVolume(weekStart, weekEnd, weeklyWorkouts));
+        }
+
+        List<WeeklyVolumeChangeDto> weeklyChanges = new ArrayList<>();
+        for (int index = 1; index < weeks.size(); index++) {
+            WeeklyVolumeDto previousWeek = weeks.get(index - 1);
+            WeeklyVolumeDto currentWeek = weeks.get(index);
+            double volumeChange = currentWeek.totalVolume() - previousWeek.totalVolume();
+            Double percentageChange = previousWeek.totalVolume() == 0 ? null
+                    : (volumeChange / previousWeek.totalVolume()) * 100;
+            weeklyChanges.add(new WeeklyVolumeChangeDto(
+                    currentWeek, previousWeek, volumeChange, percentageChange));
+        }
+
+        return new WeeklyVolumeAnalysisDto(
+                muscleId, muscleGroup, targetName, numWeeksBack, weeklyChanges);
+    }
+
+    public ChatResponseDto analyzeWeeklyVolumeWithAi(
+            Long muscleId,
+            MuscleGroup muscleGroup,
+            LocalDate date,
+            Integer numWeeksBack
+    ) throws JsonProcessingException {
+        WeeklyVolumeAnalysisDto analysis = getWeeklyVolumeAnalysis(
+                muscleId, muscleGroup, date, numWeeksBack);
+        String prompt = "Summarize this week-over-week workout volume data in no more than five short sentences. "
+                + "State the main trend and give one actionable recommendation. "
+                + "Do not list every week, recalculate values, or invent missing data. Data: "
+                + objectMapper.writeValueAsString(analysis);
+        return geminiService.getConciseChatResponseDto(prompt);
+    }
+
+    public WeeklyOneRepMaxAnalysisDto getWeeklyOneRepMaxAnalysis(
+            Long muscleId,
+            LocalDate date,
+            Integer numWeeksBack
+    ) {
+        if (numWeeksBack == null || numWeeksBack < 1) {
+            throw new IllegalArgumentException("numWeeksBack must be at least 1");
+        }
+
+        MuscleDto muscle = muscleService.getMuscle(muscleId);
+        LocalDate currentStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate currentEnd = currentStart.plusDays(6);
+        LocalDate earliestStart = currentStart.minusWeeks(numWeeksBack);
+        List<Workout> workouts = workoutService.getWorkoutsByMuscleAndDateRange(
+                muscleId, earliestStart, currentEnd);
+
+        Map<Long, List<Workout>> workoutsByExercise = workouts.stream()
+                .collect(Collectors.groupingBy(workout -> workout.getExercise().getId()));
+        List<ExerciseWeeklyOneRepMaxDto> exercises = workoutsByExercise.values().stream()
+                .map(exerciseWorkouts -> toExerciseWeeklyOneRepMax(
+                        exerciseWorkouts, currentStart, numWeeksBack))
+                .sorted(Comparator.comparing(ExerciseWeeklyOneRepMaxDto::exerciseName))
+                .toList();
+
+        return new WeeklyOneRepMaxAnalysisDto(
+                muscleId,
+                muscle.name(),
+                AGE,
+                weightService.getNewestWeightEntry(),
+                numWeeksBack,
+                exercises
+        );
+    }
+
+    public ChatResponseDto analyzeWeeklyOneRepMaxWithAi(
+            Long muscleId,
+            LocalDate date,
+            Integer numWeeksBack
+    ) throws JsonProcessingException {
+        WeeklyOneRepMaxAnalysisDto analysis = getWeeklyOneRepMaxAnalysis(
+                muscleId, date, numWeeksBack);
+        String prompt = "Summarize this exercise-specific week-over-week estimated one-rep-max data in no more "
+                + "than five short sentences. State the main strength trend and give one actionable recommendation. "
+                + "Do not list every exercise or week. Treat missing weeks as missing data and do not invent data. Data: "
+                + objectMapper.writeValueAsString(analysis);
+        return geminiService.getConciseChatResponseDto(prompt);
+    }
+
+    private ExerciseWeeklyOneRepMaxDto toExerciseWeeklyOneRepMax(
+            List<Workout> workouts,
+            LocalDate currentStart,
+            int numWeeksBack
+    ) {
+        Exercise exercise = workouts.getFirst().getExercise();
+        List<WeeklyOneRepMaxDto> weeks = new ArrayList<>();
+        for (int weeksAgo = numWeeksBack; weeksAgo >= 0; weeksAgo--) {
+            LocalDate weekStart = currentStart.minusWeeks(weeksAgo);
+            LocalDate weekEnd = weekStart.plusDays(6);
+            WorkoutSet topSet = workouts.stream()
+                    .filter(workout -> !workout.getWorkoutDate().isBefore(weekStart)
+                            && !workout.getWorkoutDate().isAfter(weekEnd))
+                    .flatMap(workout -> workout.getWorkoutSets().stream())
+                    .max(Comparator.comparingDouble(set ->
+                            calculateEstimatedOneRepMax(set, exercise.getExerciseType())))
+                    .orElse(null);
+            weeks.add(topSet == null
+                    ? new WeeklyOneRepMaxDto(weekStart, weekEnd, null, null, null, null)
+                    : new WeeklyOneRepMaxDto(
+                            weekStart,
+                            weekEnd,
+                            calculateEstimatedOneRepMax(topSet, exercise.getExerciseType()),
+                            SetDto.getSetDto(topSet),
+                            topSet.getWorkout().getId(),
+                            topSet.getWorkout().getWorkoutDate()
+                    ));
+        }
+
+        List<WeeklyOneRepMaxChangeDto> weeklyChanges = new ArrayList<>();
+        for (int index = 1; index < weeks.size(); index++) {
+            WeeklyOneRepMaxDto previousWeek = weeks.get(index - 1);
+            WeeklyOneRepMaxDto currentWeek = weeks.get(index);
+            Double change = currentWeek.oneRepMax() == null || previousWeek.oneRepMax() == null
+                    ? null
+                    : currentWeek.oneRepMax() - previousWeek.oneRepMax();
+            Double percentageChange = change == null || previousWeek.oneRepMax() == 0
+                    ? null
+                    : (change / previousWeek.oneRepMax()) * 100;
+            weeklyChanges.add(new WeeklyOneRepMaxChangeDto(
+                    currentWeek, previousWeek, change, percentageChange));
+        }
+        return new ExerciseWeeklyOneRepMaxDto(
+                exercise.getId(), exercise.getName(), weeklyChanges);
+    }
+
+    private WeeklyVolumeDto toWeeklyVolume(LocalDate startDate, LocalDate endDate, List<Workout> workouts) {
+        double totalVolume = workouts.stream().mapToDouble(workout -> calculateTotalVolume(
+                WorkoutDto.getWorkoutDto(workout), workout.getExercise().getExerciseType())).sum();
+        List<WorkoutDto> workoutDtos = workouts.stream().map(WorkoutDto::getWorkoutDto).toList();
+        return new WeeklyVolumeDto(startDate, endDate, workoutDtos, totalVolume);
     }
 
     private WorkoutSet getTopSet(Workout workout) {

@@ -2,13 +2,16 @@ import { useState } from "react";
 import { ExerciseData } from "./exercise-data";
 import { ExerciseAnalytics, RelativeStrengthAnalytics, WeightAnalytics } from "./linegraphs";
 import { SetsByMuscleGroupPieChart, WorkoutBreakdownPieChart } from "./piecharts";
+import { WeeklyVolumeAnalytics } from "./weekly-volume";
+import { WeeklyOneRepMaxAnalytics } from "./weekly-one-rep-max";
 
-type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown";
+type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown" | "weeklyVolume" | "weeklyOneRepMax";
 
 export const AnalyticsContainer = () => {
   const [exerciseId, setExerciseId] = useState<number>(-1);
   const [numMonthsBack, setNumberMonthsBack] = useState<number>(2);
   const [analyticType, setAnalyticType] = useState<AnalyticType>("general");
+  const hasDedicatedFilters = analyticType === "weeklyVolume" || analyticType === "weeklyOneRepMax";
 
   const increaseMonthsBack = () => {
     setNumberMonthsBack(numMonthsBack + 1);
@@ -33,7 +36,7 @@ export const AnalyticsContainer = () => {
   return (
     <main className="p-2 flex flex-col gap-4">
       <div className="px-4 flex justify-between gap-4 items-center">
-        <ExerciseData handleExerciseChange={handleExerciseChange} />
+        {!hasDedicatedFilters && <ExerciseData handleExerciseChange={handleExerciseChange} />}
         <label className="input">
           <span className="label-text">Analytic Type</span>
           <select
@@ -46,10 +49,12 @@ export const AnalyticsContainer = () => {
             <option value="weight">Weight</option>
             <option value="workoutBreakdown">Workout Breakdown</option>
             <option value="setBreakdown">Set Breakdown</option>
+            <option value="weeklyVolume">Weekly Volume</option>
+            <option value="weeklyOneRepMax">Weekly One Rep Max</option>
           </select>
         </label>
 
-        <div>
+        {!hasDedicatedFilters && <div>
           <label className="flex flex-col gap-2 text-lg">
             Months Back
             <span className="flex gap-2 text-lg items-center">
@@ -66,7 +71,7 @@ export const AnalyticsContainer = () => {
               </button>
             </span>
           </label>
-        </div>
+        </div>}
       </div>
       <div>
       <AnalyticDisplay exerciseId={exerciseId} numMonthsBack={numMonthsBack} analyticType={analyticType} />
@@ -113,5 +118,10 @@ const AnalyticDisplay = ({ exerciseId, numMonthsBack, analyticType }: AnalyticDi
       <SetsByMuscleGroupPieChart />
     );
   }
+  if (analyticType === "weeklyVolume") {
+    return <WeeklyVolumeAnalytics />;
+  }
+  if (analyticType === "weeklyOneRepMax") {
+    return <WeeklyOneRepMaxAnalytics />;
+  }
 }
-

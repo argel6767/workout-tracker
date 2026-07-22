@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ExerciseData } from "./exercise-data";
 import { useGetWorkoutsByExercise } from "../hooks/useGetWorkoutsByExercise";
-import { AiAnalysisCard } from "./card";
+import { ExerciseAiAnalysisCard } from "./card";
 
 type TableProps<T extends Record<string, unknown>> = {
   data: T[];
@@ -31,7 +31,7 @@ export const TableContainer = () => {
             <ExerciseData handleExerciseChange={handleExerciseChange} />
           </nav>
           {renderTableContent()}
-          <AiAnalysisCard exerciseId={exerciseId}/>
+          <ExerciseAiAnalysisCard exerciseId={exerciseId}/>
         </div>
       </span>
     </main>

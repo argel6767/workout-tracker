@@ -1,4 +1,4 @@
-import type { MuscleGroup } from "./form-dtos";
+import type { MuscleGroup, WeightDto, WorkoutDto } from "./form-dtos";
 
 export type DataPoint<K, V> = {
   key: K;
@@ -36,3 +36,56 @@ export type ChatResponseDto = {
   body: string;
   timestamp: string;
 }
+
+export type WeeklyVolumeDto = {
+  startDate: string;
+  endDate: string;
+  workouts: WorkoutDto[];
+  totalVolume: number;
+};
+
+export type WeeklyVolumeChangeDto = {
+  currentWeek: WeeklyVolumeDto;
+  previousWeek: WeeklyVolumeDto;
+  volumeChange: number;
+  percentageChange: number | null;
+};
+
+export type WeeklyVolumeAnalysisDto = {
+  muscleId: number | null;
+  muscleGroup: MuscleGroup | null;
+  targetName: string;
+  numWeeksBack: number;
+  weeklyChanges: WeeklyVolumeChangeDto[];
+};
+
+export type WeeklyOneRepMaxDto = {
+  startDate: string;
+  endDate: string;
+  oneRepMax: number | null;
+  topSet: { id: number; weight: number; reps: number } | null;
+  workoutId: number | null;
+  workoutDate: string | null;
+};
+
+export type WeeklyOneRepMaxChangeDto = {
+  currentWeek: WeeklyOneRepMaxDto;
+  previousWeek: WeeklyOneRepMaxDto;
+  oneRepMaxChange: number | null;
+  percentageChange: number | null;
+};
+
+export type ExerciseWeeklyOneRepMaxDto = {
+  exerciseId: number;
+  exerciseName: string;
+  weeklyChanges: WeeklyOneRepMaxChangeDto[];
+};
+
+export type WeeklyOneRepMaxAnalysisDto = {
+  muscleId: number;
+  muscleName: string;
+  age: number;
+  bodyWeight: WeightDto;
+  numWeeksBack: number;
+  exercises: ExerciseWeeklyOneRepMaxDto[];
+};
