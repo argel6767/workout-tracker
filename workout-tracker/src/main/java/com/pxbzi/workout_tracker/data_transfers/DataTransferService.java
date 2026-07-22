@@ -67,10 +67,17 @@ public class DataTransferService {
         List<Exercise> savedExercises = exerciseRepository.saveAll(
                 data.exercises().stream()
                         .map(dto -> {
+                            Muscle primaryMuscle = muscleByName.get(dto.primaryMuscle());
+                            if (primaryMuscle == null || !dto.musclesWorked().contains(dto.primaryMuscle())) {
+                                throw new IllegalArgumentException(
+                                        "Exercise '" + dto.name() + "' has an invalid or missing primary muscle"
+                                );
+                            }
                             Exercise exercise = Exercise.builder()
                                     .name(dto.name())
                                     .description(dto.description())
                                     .exerciseType(dto.exerciseType())
+                                    .primaryMuscle(primaryMuscle)
                                     .build();
                             List<ExerciseMuscle> exerciseMuscles = dto.musclesWorked().stream()
                                     .map(muscleName -> new ExerciseMuscle(exercise, muscleByName.get(muscleName)))

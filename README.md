@@ -1,303 +1,275 @@
 # Workout Tracker
 
-A full-stack application for tracking gym progress, exercises, and visualizing workout analytics. This application helps you monitor your fitness journey by recording exercises, sets, reps, weights, and body weight over time, with **AI-powered progress analysis** using Google's Gemini.
+A personal full-stack workout tracker for recording training sessions, monitoring body weight, visualizing progress, and generating concise AI-assisted training insights.
 
-## 📋 Overview
+## Features
 
-Workout Tracker is a comprehensive fitness tracking solution built with a modern tech stack. It consists of two main components:
-- **Backend API**: A Spring Boot REST API that handles data persistence, business logic, and AI-powered analytics
-- **Frontend App**: A React-based web interface for data entry and visualization
+### Workout tracking
 
-## 🏗️ Architecture
+- Create exercises and associate them with one or more muscles.
+- Classify exercises as bodyweight, machine, cable, or free-weight movements.
+- Record workouts with dated sets, reps, and weight.
+- Track body-weight entries over time.
+- View workout history by exercise.
+- Export and import workout data as JSON.
 
-### Backend (`workout-tracker`)
-- **Framework**: Spring Boot 4.0.1
-- **Language**: Java 21
-- **Database**: PostgreSQL
-- **ORM**: Spring Data JPA
-- **Security**: Spring Security
-- **AI Integration**: Google Gemini SDK
-- **Build Tool**: Maven
+### Analytics
 
-#### Key Features:
-- RESTful API endpoints for all workout-related operations
-- Entity relationships for exercises, muscles, workouts, and sets
-- Analytics service for workout insights
-- **AI-powered exercise progression analysis using Google Gemini**
-- PostgreSQL database with optimized indexing
-- Docker support for containerized deployment
+- Estimated one-rep max, average weight per rep, and total volume by exercise.
+- Relative strength based on estimated 1RM and body weight.
+- Body-weight trends.
+- Workout and set distributions by muscle group.
+- Strongest exercise for a muscle or muscle group.
+- Weekly training-volume comparisons for either a muscle group or an individual muscle.
+- Weekly estimated 1RM comparisons for each exercise associated with an individual muscle.
+- Configurable week and month lookback periods.
 
-#### API Endpoints:
-- `/v1/workouts` - Manage workout sessions
-  - `GET /dates` - Get workouts by date
-  - `GET /exercises` - Get workouts by exercise
-  - `POST /bulk` - Bulk create workouts
-- `/v1/exercises` - CRUD operations for exercises
-  - `POST /bulk` - Bulk create exercises
-- `/v1/muscles` - Manage muscle groups and individual muscles
-  - `POST /bulk` - Bulk create muscles
-- `/v1/weights` - Track body weight over time
-  - `GET /dates` - Get weights by date range
-- `/v1/analytics` - Retrieve workout analytics and statistics
-  - `GET /progress/exercise` - Exercise-specific analytics (ORM, avg weight, volume)
-  - `GET /progress/relative-strength` - Relative strength over time
-  - `GET /progress/ai-analysis` - AI-powered progression analysis
-  - `GET /progress/workouts-breakdown` - Workout distribution by muscle group
-  - `GET /strongest-exercises/muscle-groups/{muscleGroup}` - Strongest exercise by muscle group
-  - `GET /strongest-exercises/muscles/{muscleId}` - Strongest exercise by muscle
-- `/v1/gemini` - AI chat interface
-  - `POST /query` - Send queries to Gemini AI
+### AI insights
 
-### Frontend (`tracker-app`)
-- **Framework**: React 19.2.0 with TypeScript
-- **Build Tool**: Vite 7.2
-- **Styling**: Tailwind CSS 4.1 + DaisyUI 5.5
-- **Data Fetching**: TanStack Query (React Query) + Axios
-- **Charts**: Recharts 3.7
+Google Gemini provides analysis for:
 
-#### Key Features:
-- **Data Entry Forms**:
-  - Add new workouts with sets, reps, and weights
-  - Create custom exercises with muscle group mappings
-  - Define new muscle groups
-  - Track body weight entries
+- Individual exercise progression.
+- Weekly training-volume changes.
+- Weekly estimated 1RM changes.
+- Workout-count balance across muscle groups.
+- Set-count balance across muscle groups.
 
-- **Analytics Dashboard**:
-  - **One Rep Max (ORM)** tracking over time
-  - **Average Weight Per Rep** analysis
-  - **Total Volume** (weight × reps) tracking
-  - **Relative Strength** visualization (strength relative to body weight)
-  - **Body Weight** tracking with line charts
-  - **Workout Breakdown** by muscle group (pie chart)
-  - Configurable time range (months back)
-  - Exercise-specific filtering
+Chart data and AI analysis use separate requests. This allows charts and statistics to render immediately while the AI card continues loading. The newer analytics prompts are limited to five short sentences and one actionable recommendation.
 
-- **AI-Powered Insights**:
-  - Automatic exercise progression analysis
-  - Personalized feedback on workout performance
-  - AI analysis cards in workout history view
+## Technology stack
 
-- **Data Visualization**:
-  - Interactive line charts for progress tracking
-  - Pie charts for workout distribution
-  - Tabular data display with smart formatting
-  - View workout history by exercise
+### Frontend
 
-- **User Interface**:
-  - Clean, modern UI with DaisyUI components
-  - Responsive design
-  - Real-time data updates with React Query
-  - Dynamic exercise filtering by muscle group
-  - Three main views: Data Entry, Analytics, Tables
+- React 19 and TypeScript 5.9
+- Vite 7
+- Tailwind CSS 4 and DaisyUI 5
+- TanStack Query 5 and Axios
+- Recharts 3
+- pnpm
 
-## 🚀 Getting Started
+### Backend
 
-### Quick Start with Docker Compose (Recommended)
+- Java 21
+- Spring Boot 4.0.1
+- Spring Web MVC and Spring Security
+- Spring Data JPA and PostgreSQL
+- Google Gen AI SDK 1.36
+- Jackson and Lombok
+- Maven
 
-The easiest way to run the entire application stack is using Docker Compose:
+## Project structure
 
-```bash
-docker compose up
+```text
+workout-tracker/
+|-- compose.yml                 # PostgreSQL, API, and frontend services
+|-- tracker-app/                # React/Vite frontend
+|   |-- src/api/                # Axios request functions
+|   |-- src/hooks/              # TanStack Query hooks
+|   |-- src/components/         # Forms, charts, cards, and tables
+|   `-- src/lib/                # Shared TypeScript DTOs
+`-- workout-tracker/            # Spring Boot backend
+    `-- src/main/java/com/pxbzi/workout_tracker/
+        |-- analytics/
+        |-- data_transfers/
+        |-- exercises/
+        |-- gemini/
+        |-- muscles/
+        |-- weights/
+        |-- workouts/
+        `-- workout_sets/
 ```
 
-This single command will:
-- Spin up a PostgreSQL database container
-- Build and start the Spring Boot API
-- Build and start the React frontend
-- Configure all networking and environment variables automatically
+The backend is organized by domain. Controllers delegate to services, services own business logic and repository access, and API responses use dedicated DTOs. The frontend separates API functions, query hooks, DTO types, and rendering components.
 
-**Services will be available at:**
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8080`
-- PostgreSQL: `localhost:5432`
+## Quick start with Docker Compose
 
-To stop all services:
-```bash
-docker compose down
+### Prerequisites
+
+- Docker Desktop with Docker Compose
+- A Google Gemini API key
+
+Create `workout-tracker/.env`:
+
+```env
+GEMINI_API_KEY=your_api_key_here
 ```
 
-To rebuild after code changes:
+Start the complete stack from the repository root:
+
 ```bash
 docker compose up --build
 ```
 
-### Manual Setup
+Or run it in the background:
 
-If you prefer to run the services individually without Docker:
-
-#### Prerequisites
-- Java 21 or higher
-- Node.js 21 or higher
-- PostgreSQL database
-- Maven (for backend)
-- pnpm (for frontend)
-- **Google Gemini API Key** (for AI features)
-
-#### Backend Setup
-
-1. Navigate to the backend directory:
 ```bash
-cd workout-tracker/workout-tracker
+docker compose up --build -d
 ```
 
-2. Configure your PostgreSQL database connection in `src/main/resources/application.properties`
+Services are exposed at:
 
-3. **Set up your Gemini API Key**:
-   Create a `.env` file in the `workout-tracker` directory with:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-   > ⚠️ **Security Note**: Never commit your API key to version control. The `.env` file should be in `.gitignore`.
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080
+- PostgreSQL: `localhost:5432`
 
-4. Build and run the application:
+Useful commands:
+
 ```bash
-mvn clean install
-mvn spring-boot:run
+docker compose logs -f
+docker compose down
 ```
 
-The API will be available at `http://localhost:8080`
+Database data is stored in the `postgres_data` Docker volume. Running `docker compose down -v` also deletes that persisted database data.
 
-#### Frontend Setup
+## Manual development
 
-1. Navigate to the frontend directory:
+### Backend
+
+Requirements: Java 21, Maven, PostgreSQL, and a Gemini API key.
+
+```bash
+cd workout-tracker
+```
+
+Configure the environment for your PostgreSQL instance and Gemini key. For example:
+
+```env
+GEMINI_API_KEY=your_api_key_here
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/workout_tracker
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=password
+SPRING_JPA_HIBERNATE_DDL_AUTO=update
+```
+
+Then run:
+
+```bash
+./mvnw spring-boot:run
+```
+
+On Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+### Frontend
+
+Requirements: Node.js 22 or later and pnpm.
+
 ```bash
 cd tracker-app
-```
-
-2. Install dependencies:
-```bash
 pnpm install
-```
-
-3. Start the development server:
-```bash
 pnpm dev
 ```
 
-The app will be available at `http://localhost:5173`
+The Axios client currently targets `http://localhost:8080`.
 
-## 🐳 Docker Deployment
+## API overview
 
-### Docker Compose (Recommended)
+All application endpoints are under `/v1`.
 
-The project includes a `compose.yml` file in the root directory that orchestrates all services:
+### Core resources
 
-**Services:**
-- **db**: PostgreSQL 16 database with persistent volume storage
-- **api**: Spring Boot backend (auto-built from Dockerfile)
-- **app**: React frontend (auto-built from Dockerfile)
+| Resource | Base path | Capabilities |
+| --- | --- | --- |
+| Workouts | `/v1/workouts` | CRUD, bulk creation, date filtering, exercise filtering |
+| Exercises | `/v1/exercises` | CRUD and bulk creation |
+| Muscles | `/v1/muscles` | CRUD and bulk creation |
+| Weights | `/v1/weights` | CRUD and date-range filtering |
+| Data transfer | `/v1/data-transfers` | JSON import/export through request bodies or files |
+| Gemini | `/v1/gemini/query` | Direct Gemini query endpoint |
 
-**Features:**
-- Automatic service dependency management
-- Health checks to ensure database is ready before starting API
-- Persistent data storage with Docker volumes
-- Environment variable configuration (including Gemini API key via `.env` file)
-- Automatic network creation for service communication
+### Analytics endpoints
 
-```bash
-# Start all services
-docker compose up
+| Endpoint | Description |
+| --- | --- |
+| `GET /v1/analytics/progress/exercise` | Estimated 1RM, average weight per rep, and volume for an exercise |
+| `GET /v1/analytics/progress/relative-strength` | Exercise strength relative to body weight |
+| `GET /v1/analytics/progress/ai-analysis` | Detailed individual-exercise AI analysis |
+| `GET /v1/analytics/progress/workouts-breakdown` | Workout counts by muscle group |
+| `GET /v1/analytics/progress/workouts-breakdown/ai-analysis` | AI analysis of workout balance |
+| `GET /v1/analytics/progress/sets-breakdown` | Set counts by muscle group |
+| `GET /v1/analytics/progress/sets-breakdown/ai-analysis` | AI analysis of set balance |
+| `GET /v1/analytics/progress/volume-breakdown` | Total volume aggregated by month |
+| `GET /v1/analytics/progress/weekly-volume` | Week-over-week volume data |
+| `GET /v1/analytics/progress/weekly-volume/ai-analysis` | Concise AI analysis of weekly volume |
+| `GET /v1/analytics/progress/weekly-one-rep-max` | Exercise-specific weekly estimated 1RM data for a muscle |
+| `GET /v1/analytics/progress/weekly-one-rep-max/ai-analysis` | Concise AI analysis of weekly estimated 1RM |
+| `GET /v1/analytics/strongest-exercises/muscle-groups/{muscleGroup}` | Strongest exercise in a muscle group |
+| `GET /v1/analytics/strongest-exercises/muscles/{muscleId}` | Strongest exercise for an individual muscle |
+| `GET /v1/analytics/strongest-exercises` | Table-ready strongest exercises for all muscles and muscle groups |
+| `GET /v1/analytics/strongest-exercises/ai-analysis` | Concise AI analysis of strongest-exercise coverage |
 
-# Start in detached mode
-docker compose up -d
+### Weekly volume examples
 
-# View logs
-docker compose logs -f
+Select either `muscleId` or `muscleGroup`, but not both. `numWeeksBack` defaults to `5`; `date` identifies the final comparison week.
 
-# Stop all services
-docker compose down
-
-# Remove volumes (deletes data)
-docker compose down -v
+```http
+GET /v1/analytics/progress/weekly-volume?muscleGroup=BACK&date=2026-07-22
 ```
 
-### Individual Docker Builds
-
-If you prefer to build and run containers individually:
-
-#### Backend:
-```bash
-cd workout-tracker/workout-tracker
-docker build -t workout-tracker-api .
-docker run -p 8080:8080 -e GEMINI_API_KEY=your_key workout-tracker-api
+```http
+GET /v1/analytics/progress/weekly-volume?muscleId=12&date=2026-07-22&numWeeksBack=8
 ```
 
-#### Frontend:
+### Weekly estimated 1RM example
+
+Weekly estimated 1RM analysis requires an individual muscle. Only exercises that primarily target that muscle are included, exercises are compared only against themselves, and weeks without an exercise are represented as missing data rather than zero strength.
+
+```http
+GET /v1/analytics/progress/weekly-one-rep-max?muscleId=9&date=2026-07-22&numWeeksBack=5
+```
+
+The response also includes the configured age and latest body-weight entry used as context for AI analysis and bodyweight exercises.
+
+## Calculations
+
+- Estimated 1RM uses the Epley formula: `weight * (1 + reps / 30)`.
+- Total volume is the sum of `weight * reps` across sets.
+- Bodyweight movements add the latest recorded body weight to any external load.
+- Relative strength compares estimated 1RM with the nearest available body-weight data in the selected period.
+
+## Data model
+
+- `Muscle`: an individual muscle assigned to a muscle group.
+- `Exercise`: a movement with an exercise type, one required primary muscle, and one or more muscles worked.
+- `ExerciseMuscle`: the join entity connecting exercises and muscles.
+- `Workout`: a dated performance of one exercise.
+- `WorkoutSet`: reps and weight belonging to a workout.
+- `Weight`: a dated body-weight entry.
+
+Muscle-specific and muscle-group analytics use an exercise's primary muscle, so secondary involvement from compound movements does not distort rankings or trends. New exercises require the primary muscle to also appear in their muscles-worked list.
+
+Workout sets cascade with their workout, and removing a set from a workout removes the orphaned database record. Frequently queried dates, exercise IDs, muscle IDs, primary muscles, names, and types are indexed.
+
+## Security and error handling
+
+- The API currently permits all routes and is intended for personal/local use.
+- CORS permits the frontend at `http://localhost:5173`.
+- CSRF is disabled for the REST API.
+- Gemini credentials are loaded from `GEMINI_API_KEY`; never commit `.env` files.
+- A global exception handler extends Spring's `ResponseEntityExceptionHandler` so standard MVC errors retain their correct HTTP status codes.
+
+## Verification
+
+Frontend checks:
+
 ```bash
 cd tracker-app
-docker build -t workout-tracker-app .
-docker run -p 5173:5173 workout-tracker-app
+pnpm run lint
+pnpm run build
 ```
 
-## 📊 Data Model
+Backend checks:
 
-### Core Entities:
-- **Muscle**: Individual muscles and muscle groups (Chest, Back, Shoulders, Legs, Arms, Core)
-- **Exercise**: Workout exercises linked to primary muscle groups and multiple muscles worked
-- **Workout**: Individual workout sessions linked to specific exercises
-- **WorkoutSet**: Sets within a workout (weight + reps)
-- **Weight**: Body weight tracking entries with timestamps
+```bash
+cd workout-tracker
+./mvnw test
+```
 
-### Relationships:
-- Exercises can target multiple muscles (many-to-many)
-- Each exercise belongs to one primary muscle group
-- Workouts are associated with one exercise
-- Workouts contain multiple sets
-- Weight entries are tracked independently with timestamps
+The Spring context test requires a configured datasource.
 
-## 🛠️ Technology Stack
+## Author
 
-### Backend
-- Spring Boot 4.0.1
-- Spring Data JPA
-- Spring Security
-- Spring Web MVC
-- PostgreSQL Driver
-- Google Gemini SDK 1.36.0
-- Jackson JSR310 (Date/Time serialization)
-- Lombok
-- Maven
-
-### Frontend
-- React 19.2.0
-- TypeScript 5.9
-- Vite 7.2
-- Tailwind CSS 4.1
-- DaisyUI 5.5
-- TanStack Query 5.90
-- Axios 1.13
-- Recharts 3.7
-
-## 📝 Development
-
-### Backend Development
-- Hot reload enabled with Spring Boot DevTools
-- Lombok annotations for boilerplate reduction
-- Service layer pattern for business logic
-- Repository pattern with Spring Data JPA
-- Modular package structure (analytics, exercises, gemini, muscles, weights, workouts)
-
-### Frontend Development
-- TypeScript for type safety
-- Custom hooks for data fetching
-- Component-based architecture
-- Form state management with React hooks
-- API client configuration with Axios
-- Reusable chart components (LineGraph, PieGraph)
-
-## 🔒 Security
-
-The backend includes Spring Security for authentication and authorization (configuration details in the security config).
-
-**API Key Security**: The Gemini API key is loaded from environment variables and should never be hardcoded or committed to version control.
-
-## 📈 Future Enhancements
-
-- Export workout data (CSV/PDF)
-- Mobile-responsive improvements
-- User authentication and multi-user support? (maybe)
-- Workout templates and routines
-
-## 👤 Author
-
-Built by Argel Hernandez Amaya
+Built by Argel Hernandez Amaya.

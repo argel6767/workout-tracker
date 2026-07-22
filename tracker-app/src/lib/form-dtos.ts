@@ -5,6 +5,7 @@ export type NewExerciseDto = {
   name: string;
   description: string;
   musclesWorked: number[];
+  primaryMuscleId: number;
   exerciseType: ExerciseType;
 };
 
@@ -37,7 +38,9 @@ export type ExerciseDto = {
   name: string;
   description: string;
   musclesWorked: MuscleDto[];
+  primaryMuscle: MuscleDto;
   primaryMuscleGroup: string;
+  exerciseType: ExerciseType;
 };
 
 type SetDto = {

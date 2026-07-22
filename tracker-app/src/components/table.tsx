@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ExerciseData } from "./exercise-data";
 import { useGetWorkoutsByExercise } from "../hooks/useGetWorkoutsByExercise";
 import { ExerciseAiAnalysisCard } from "./card";
+import { StrongestExercisesTables } from "./strongest-exercises-table";
 
 type TableProps<T extends Record<string, unknown>> = {
   data: T[];
@@ -9,6 +10,7 @@ type TableProps<T extends Record<string, unknown>> = {
 
 export const TableContainer = () => {
   const [exerciseId, setExerciseId] = useState<number>(-1);
+  const [tableView, setTableView] = useState<"history" | "strongest">("history");
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setExerciseId(Number(e.target.value));
   };
@@ -24,16 +26,27 @@ export const TableContainer = () => {
   };
 
   return (
-    <main className="hero">
-      <span className="hero-content text-center">
-        <div className="flex flex-col gap-8 justify-center items-center">
-          <nav>
-            <ExerciseData handleExerciseChange={handleExerciseChange} />
-          </nav>
+    <main className="w-full p-4 flex flex-col gap-8">
+      <nav className="flex justify-center gap-4">
+        <button className={`btn ${tableView === "history" ? "btn-primary" : "btn-neutral"}`}
+          onClick={() => setTableView("history")}>
+          Workout History
+        </button>
+        <button className={`btn ${tableView === "strongest" ? "btn-primary" : "btn-neutral"}`}
+          onClick={() => setTableView("strongest")}>
+          Strongest Exercises
+        </button>
+      </nav>
+
+      {tableView === "history" ? (
+        <div className="flex flex-col gap-8 justify-center items-center text-center">
+          <ExerciseData handleExerciseChange={handleExerciseChange} />
           {renderTableContent()}
           <ExerciseAiAnalysisCard exerciseId={exerciseId}/>
         </div>
-      </span>
+      ) : (
+        <StrongestExercisesTables />
+      )}
     </main>
   );
 };

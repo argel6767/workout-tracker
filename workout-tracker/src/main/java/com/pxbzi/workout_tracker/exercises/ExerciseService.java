@@ -6,7 +6,6 @@ import com.pxbzi.workout_tracker.exercises.models.ExerciseMuscle;
 import com.pxbzi.workout_tracker.exercises.models.NewExerciseDto;
 import com.pxbzi.workout_tracker.muscles.models.Muscle;
 import com.pxbzi.workout_tracker.muscles.models.MuscleDto;
-import com.pxbzi.workout_tracker.workouts.WorkoutRepository;
 import com.pxbzi.workout_tracker.muscles.MuscleRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
@@ -100,6 +99,13 @@ public class ExerciseService {
         exercise.setName(dto.name());
         exercise.setDescription(dto.description() == null ? "" : dto.description());
         exercise.setMusclesWorked(exerciseMuscles);
+        if (dto.primaryMuscleId() == null || !dto.musclesWorked().contains(dto.primaryMuscleId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Primary muscle is required and must be included in muscles worked"
+            );
+        }
+        exercise.setPrimaryMuscle(muscleRepository.findById(dto.primaryMuscleId()).orElseThrow());
         if (dto.exerciseType() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Required exercise type is missing");
         }
@@ -119,6 +125,12 @@ public class ExerciseService {
                 exerciseMuscles.add(exerciseMuscle);
             }
         }
+
+        if (dto.primaryMuscle() == null || dto.musclesWorked().stream()
+                .noneMatch(muscle -> muscle.id().equals(dto.primaryMuscle().id()))) {
+            throw new IllegalArgumentException("Primary muscle must be included in muscles worked");
+        }
+        exercise.setPrimaryMuscle(muscleRepository.findById(dto.primaryMuscle().id()).orElseThrow());
         
     }
 

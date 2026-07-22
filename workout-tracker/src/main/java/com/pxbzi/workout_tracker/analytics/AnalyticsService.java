@@ -27,10 +27,12 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -153,6 +155,75 @@ public class AnalyticsService {
                 )
             )
             .orElseThrow();
+    }
+
+    public StrongestExercisesOverviewDto getAllStrongestExercises(
+            boolean includeMuscles,
+            boolean includeMuscleGroups
+    ) {
+        if (!includeMuscles && !includeMuscleGroups) {
+            throw new IllegalArgumentException("At least one strongest-exercise category must be included");
+        }
+
+        List<StrongestExerciseByMuscleGroupDto> muscleGroups = includeMuscleGroups
+                ? Arrays.stream(MuscleGroup.values())
+                        .map(this::getStrongestExerciseByMuscleGroupOrNull)
+                        .filter(dto -> dto != null)
+                        .toList()
+                : List.of();
+
+        List<StrongestExerciseForMuscleDto> muscles = includeMuscles
+                ? muscleService.getAllMuscles().stream()
+                        .map(this::getStrongestExerciseForMuscleOrNull)
+                        .filter(dto -> dto != null)
+                        .sorted(Comparator.comparing(StrongestExerciseForMuscleDto::muscleName))
+                        .toList()
+                : List.of();
+
+        return new StrongestExercisesOverviewDto(muscleGroups, muscles);
+    }
+
+    public ChatResponseDto analyzeAllStrongestExercises(
+            boolean includeMuscles,
+            boolean includeMuscleGroups
+    ) throws JsonProcessingException {
+        StrongestExercisesOverviewDto overview = getAllStrongestExercises(
+                includeMuscles, includeMuscleGroups);
+        WeightDto bodyWeight = weightService.getNewestWeightEntry();
+        String prompt = "Analyze this strongest-exercise overview in no more than five short sentences. "
+                + "Summarize overall strength coverage, call out at most two notable strengths or gaps, and finish "
+                + "with one actionable recommendation. Do not rank unrelated exercises against each other, provide "
+                + "population comparisons, list every row, or invent missing data. User context: age " + AGE
+                + ", sex " + SEX + ", latest body weight: "
+                + objectMapper.writeValueAsString(bodyWeight) + ". Data: "
+                + objectMapper.writeValueAsString(overview);
+        return geminiService.getConciseChatResponseDto(prompt);
+    }
+
+    private StrongestExerciseByMuscleGroupDto getStrongestExerciseByMuscleGroupOrNull(
+            MuscleGroup muscleGroup
+    ) {
+        try {
+            return getStrongestExerciseByMuscleGroup(muscleGroup);
+        } catch (NoSuchElementException ignored) {
+            return null;
+        }
+    }
+
+    private StrongestExerciseForMuscleDto getStrongestExerciseForMuscleOrNull(MuscleDto muscle) {
+        try {
+            StrongestExerciseByMuscleDto strongest = getStrongestExerciseByMuscle(muscle.id());
+            return new StrongestExerciseForMuscleDto(
+                    muscle.id(),
+                    muscle.name(),
+                    strongest.exerciseId(),
+                    strongest.exerciseName(),
+                    strongest.oneRepMax(),
+                    strongest.avgWeightPerRep()
+            );
+        } catch (NoSuchElementException ignored) {
+            return null;
+        }
     }
 
     public List<RelativeStrengthDto> getRelativeStrength(int numMonthsBack, Long exerciseId) {

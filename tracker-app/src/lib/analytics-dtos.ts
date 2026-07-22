@@ -44,6 +44,20 @@ export type WeeklyVolumeDto = {
   totalVolume: number;
 };
 
+export type StrongestExerciseForMuscleDto = {
+  muscleId: number;
+  muscleName: string;
+  exerciseId: number;
+  exerciseName: string;
+  oneRepMax: number;
+  avgWeightPerRep: number;
+};
+
+export type StrongestExercisesOverviewDto = {
+  muscleGroups: StrongestExerciseByMuscleGroupDto[];
+  muscles: StrongestExerciseForMuscleDto[];
+};
+
 export type WeeklyVolumeChangeDto = {
   currentWeek: WeeklyVolumeDto;
   previousWeek: WeeklyVolumeDto;

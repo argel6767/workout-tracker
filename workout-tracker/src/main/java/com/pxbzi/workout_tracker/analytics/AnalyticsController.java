@@ -6,6 +6,7 @@ import com.pxbzi.workout_tracker.analytics.models.DataPoint;
 import com.pxbzi.workout_tracker.analytics.models.RelativeStrengthDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleGroupDto;
+import com.pxbzi.workout_tracker.analytics.models.StrongestExercisesOverviewDto;
 import com.pxbzi.workout_tracker.analytics.models.WeeklyVolumeAnalysisDto;
 import com.pxbzi.workout_tracker.analytics.models.WeeklyOneRepMaxAnalysisDto;
 import com.pxbzi.workout_tracker.gemini.models.ChatResponseDto;
@@ -104,6 +105,22 @@ public class AnalyticsController {
     @GetMapping("/strongest-exercises/muscle-groups/{muscleGroup}")
     public StrongestExerciseByMuscleGroupDto getStrongestExerciseByMuscleGroup(@PathVariable MuscleGroup muscleGroup) {
         return analyticsService.getStrongestExerciseByMuscleGroup(muscleGroup);
+    }
+
+    @GetMapping("/strongest-exercises")
+    public StrongestExercisesOverviewDto getAllStrongestExercises(
+            @RequestParam(defaultValue = "true") boolean includeMuscles,
+            @RequestParam(defaultValue = "true") boolean includeMuscleGroups
+    ) {
+        return analyticsService.getAllStrongestExercises(includeMuscles, includeMuscleGroups);
+    }
+
+    @GetMapping("/strongest-exercises/ai-analysis")
+    public ChatResponseDto getAllStrongestExercisesAiAnalysis(
+            @RequestParam(defaultValue = "true") boolean includeMuscles,
+            @RequestParam(defaultValue = "true") boolean includeMuscleGroups
+    ) throws JsonProcessingException {
+        return analyticsService.analyzeAllStrongestExercises(includeMuscles, includeMuscleGroups);
     }
 
     @GetMapping("/strongest-exercises/muscles/{muscleId}")

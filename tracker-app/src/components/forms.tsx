@@ -221,6 +221,7 @@ export const ExerciseForm = () => {
     name: "",
     description: "",
     musclesWorked: [],
+    primaryMuscleId: -1,
     exerciseType: "BODYWEIGHT"
   });
 
@@ -235,12 +236,18 @@ export const ExerciseForm = () => {
   };
 
   const handleMuscleToggle = (muscleId: number) => {
-    setNewExercise((prev) => ({
-      ...prev,
-      musclesWorked: prev.musclesWorked.includes(muscleId)
-        ? prev.musclesWorked.filter((id) => id !== muscleId)
-        : [...prev.musclesWorked, muscleId],
-    }));
+    setNewExercise((prev) => {
+      const isRemoving = prev.musclesWorked.includes(muscleId);
+      return {
+        ...prev,
+        musclesWorked: isRemoving
+          ? prev.musclesWorked.filter((id) => id !== muscleId)
+          : [...prev.musclesWorked, muscleId],
+        primaryMuscleId: isRemoving && prev.primaryMuscleId === muscleId
+          ? -1
+          : prev.primaryMuscleId,
+      };
+    });
   };
   
   const handleExerciseTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -257,6 +264,7 @@ export const ExerciseForm = () => {
         name: "",
         description: "",
         musclesWorked: [],
+        primaryMuscleId: -1,
         exerciseType: "BODYWEIGHT"
       });
     } catch (error) {
@@ -323,7 +331,30 @@ export const ExerciseForm = () => {
             </label>
           ))}
         </fieldset>
-        <button type="submit" className="btn btn-primary">
+        <label className="input">
+          <span className="label">Primary Muscle</span>
+          <select
+            required
+            value={newExercise.primaryMuscleId}
+            onChange={(event) => setNewExercise((prev) => ({
+              ...prev,
+              primaryMuscleId: Number(event.target.value),
+            }))}
+            className="bg-base-200 rounded-lg p-1"
+          >
+            <option value={-1} disabled>Select a primary muscle</option>
+            {availableMuscles!
+              .filter((muscle) => newExercise.musclesWorked.includes(muscle.id))
+              .map((muscle) => (
+                <option key={muscle.id} value={muscle.id}>{muscle.name}</option>
+              ))}
+          </select>
+        </label>
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={newExercise.primaryMuscleId === -1}
+        >
           Add Exercise
         </button>
       </form>

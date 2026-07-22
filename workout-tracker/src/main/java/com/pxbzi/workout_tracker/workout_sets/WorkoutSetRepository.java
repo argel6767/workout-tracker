@@ -17,8 +17,7 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
     SELECT s FROM WorkoutSet s
     JOIN FETCH s.workout w
     JOIN FETCH w.exercise e
-    JOIN e.musclesWorked em
-    JOIN em.muscle m
+    JOIN e.primaryMuscle m
     WHERE m.muscleGroup = :muscleGroup
     """)
     List<WorkoutSet> findSetsByMuscleGroup(@Param("muscleGroup") MuscleGroup muscleGroup);
@@ -27,8 +26,8 @@ public interface WorkoutSetRepository extends JpaRepository<WorkoutSet, Long> {
     SELECT s FROM WorkoutSet s
     JOIN FETCH s.workout w
     JOIN FETCH w.exercise e
-    JOIN e.musclesWorked em
-    WHERE em.muscle.id = :muscleId
+    JOIN e.primaryMuscle m
+    WHERE m.id = :muscleId
     """)
     List<WorkoutSet> findSetsByMuscleId(@Param("muscleId") Long muscleId);
 

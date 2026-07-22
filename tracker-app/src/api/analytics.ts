@@ -1,5 +1,5 @@
 import { apiClient } from "./apiConfig"
-import type { DataPoint, AnalyticsDto, ChatResponseDto, RelativeStrengthDto, WeeklyOneRepMaxAnalysisDto, WeeklyVolumeAnalysisDto } from "../lib/analytics-dtos"
+import type { DataPoint, AnalyticsDto, ChatResponseDto, RelativeStrengthDto, StrongestExercisesOverviewDto, WeeklyOneRepMaxAnalysisDto, WeeklyVolumeAnalysisDto } from "../lib/analytics-dtos"
 import type { MuscleGroup } from "../lib/form-dtos"
 
 const V1_ANALYTICS = "/v1/analytics"
@@ -53,6 +53,16 @@ export const getWorkoutsBreakdownAiAnalysis = async (): Promise<ChatResponseDto>
 
 export const getSetsBreakdownAiAnalysis = async (): Promise<ChatResponseDto> => {
   const response = await apiClient.get(`${V1_ANALYTICS}/progress/sets-breakdown/ai-analysis`);
+  return response.data;
+}
+
+export const getStrongestExercises = async (): Promise<StrongestExercisesOverviewDto> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/strongest-exercises`);
+  return response.data;
+}
+
+export const getStrongestExercisesAiAnalysis = async (): Promise<ChatResponseDto> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/strongest-exercises/ai-analysis`);
   return response.data;
 }
 
