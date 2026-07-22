@@ -46,6 +46,16 @@ export const getSetsByMuscleGroup = async (): Promise<DataPoint<string, number>[
   return response.data
 }
 
+export const getWorkoutsBreakdownAiAnalysis = async (): Promise<ChatResponseDto> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/progress/workouts-breakdown/ai-analysis`);
+  return response.data;
+}
+
+export const getSetsBreakdownAiAnalysis = async (): Promise<ChatResponseDto> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/progress/sets-breakdown/ai-analysis`);
+  return response.data;
+}
+
 export const getWeeklyVolumeAnalysis = async (
   muscleGroup: MuscleGroup,
   muscleId?: number,

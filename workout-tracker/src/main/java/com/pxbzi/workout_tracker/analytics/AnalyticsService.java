@@ -276,6 +276,24 @@ public class AnalyticsService {
             .toList();
         return dataPoints;
     }
+
+    public ChatResponseDto analyzeWorkoutsBreakdown() throws JsonProcessingException {
+        List<DataPoint<String, Integer>> breakdown = aggregateWorkoutsByMuscle();
+        String prompt = "Analyze this workout-count distribution by muscle group in no more than five short sentences. "
+                + "Identify the most important training-balance trend and finish with one actionable recommendation. "
+                + "Do not list every value or invent missing context. Data: "
+                + objectMapper.writeValueAsString(breakdown);
+        return geminiService.getConciseChatResponseDto(prompt);
+    }
+
+    public ChatResponseDto analyzeSetsBreakdown() throws JsonProcessingException {
+        List<DataPoint<String, Integer>> breakdown = aggregateSetsByMuscle();
+        String prompt = "Analyze this set-count distribution by muscle group in no more than five short sentences. "
+                + "Identify the most important training-volume balance trend and finish with one actionable recommendation. "
+                + "Do not list every value or invent missing context. Data: "
+                + objectMapper.writeValueAsString(breakdown);
+        return geminiService.getConciseChatResponseDto(prompt);
+    }
     
     public List<DataPoint<String, Double>> aggregateTotalVolumeByMonth() {
         List<WorkoutDto> workouts = workoutService.getAllWorkouts();

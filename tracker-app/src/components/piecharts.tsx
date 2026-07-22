@@ -1,10 +1,14 @@
 import { PieChart, Pie, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { useGetWorkoutsByMuscleGroup } from '../hooks/useGetWorkoutsByMuscleGroup';
 import { useGetSetsByMuscleGroup } from '../hooks/useGetSetsByMuscleGroup';
+import { useGetWorkoutsBreakdownAiAnalysis } from '../hooks/useGetWorkoutsBreakdownAiAnalysis';
+import { useGetSetsBreakdownAiAnalysis } from '../hooks/useGetSetsBreakdownAiAnalysis';
+import { AiAnalysisCard } from './card';
 
 
 export const WorkoutBreakdownPieChart = () => {
   const { data, isLoading, isError } = useGetWorkoutsByMuscleGroup()
+  const { data: aiAnalysis, isLoading: aiLoading, isError: aiError } = useGetWorkoutsBreakdownAiAnalysis();
   
   if (isLoading) {
     return <span className="loading loading-dots loading-xl"></span>;
@@ -23,12 +27,15 @@ export const WorkoutBreakdownPieChart = () => {
     <main className='py-2'>
       <h2 className='text-2xl text-center'>All Workouts Broken Down by Muscle Groups</h2>
       <PieGraph data={data} dataKey="value" nameKey='key'/>
+      <AiAnalysisCard analysis={aiAnalysis} isLoading={aiLoading} isError={aiError}
+        title="Workout Balance Analysis" />
     </main>
   )
 }
 
 export const SetsByMuscleGroupPieChart = () => {
   const { data, isLoading, isError } = useGetSetsByMuscleGroup()
+  const { data: aiAnalysis, isLoading: aiLoading, isError: aiError } = useGetSetsBreakdownAiAnalysis();
   
   if (isLoading) {
     return <span className="loading loading-dots loading-xl"></span>;
@@ -47,6 +54,8 @@ export const SetsByMuscleGroupPieChart = () => {
     <main className='py-2'>
       <h2 className='text-2xl text-center'>All Sets Broken Down by Muscle Groups</h2>
       <PieGraph data={data} dataKey="value" nameKey='key'/>
+      <AiAnalysisCard analysis={aiAnalysis} isLoading={aiLoading} isError={aiError}
+        title="Set Balance Analysis" />
     </main>
   )
 }

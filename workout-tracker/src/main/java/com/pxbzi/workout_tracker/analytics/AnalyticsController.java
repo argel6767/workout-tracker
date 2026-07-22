@@ -42,10 +42,20 @@ public class AnalyticsController {
     public List<DataPoint<String, Integer>> getWorkoutsByMuscleGroup() {
         return analyticsService.aggregateWorkoutsByMuscle();
     }
+
+    @GetMapping("/progress/workouts-breakdown/ai-analysis")
+    public ChatResponseDto getWorkoutsBreakdownAiAnalysis() throws JsonProcessingException {
+        return analyticsService.analyzeWorkoutsBreakdown();
+    }
     
     @GetMapping("/progress/sets-breakdown")
     public List<DataPoint<String, Integer>> getSetsByMuscleGroup() {
         return analyticsService.aggregateSetsByMuscle();
+    }
+
+    @GetMapping("/progress/sets-breakdown/ai-analysis")
+    public ChatResponseDto getSetsBreakdownAiAnalysis() throws JsonProcessingException {
+        return analyticsService.analyzeSetsBreakdown();
     }
     
     @GetMapping("/progress/volume-breakdown")
