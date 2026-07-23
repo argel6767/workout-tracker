@@ -44,8 +44,8 @@ public class MuscleService {
 
     public MuscleDto updateMuscle(Long id, MuscleDto muscleDto) {
         Muscle muscle = muscleRepository.findById(id).orElseThrow();
-        muscle.setName(muscle.getName());
-        muscle.setMuscleGroup(muscle.getMuscleGroup());
+        muscle.setName(muscleDto.name());
+        muscle.setMuscleGroup(muscleDto.muscleGroup());
         Muscle muscleUpdated = muscleRepository.save(muscle);
         return MuscleDto.getMuscleDTO(muscleUpdated);
     }

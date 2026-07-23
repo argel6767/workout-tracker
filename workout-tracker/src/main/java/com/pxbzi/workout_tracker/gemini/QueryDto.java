@@ -1,4 +1,6 @@
 package com.pxbzi.workout_tracker.gemini;
 
-public record QueryDto(String query) {
+import jakarta.validation.constraints.NotBlank;
+
+public record QueryDto(@NotBlank String query) {
 }

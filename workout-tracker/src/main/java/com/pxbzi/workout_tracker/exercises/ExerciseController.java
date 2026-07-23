@@ -11,6 +11,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/exercises")
@@ -21,7 +22,7 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @PostMapping()
-    public ResponseEntity<ExerciseDTO> createExercise(@RequestBody NewExerciseDto newExerciseDto) {
+    public ResponseEntity<ExerciseDTO> createExercise(@Valid @RequestBody NewExerciseDto newExerciseDto) {
         ExerciseDTO exerciseDTO = exerciseService.createExercise(newExerciseDto);
         return ResponseEntity
                 .created(getLocation(exerciseDTO))
@@ -29,7 +30,7 @@ public class ExerciseController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<ExerciseDTO>> bulkCreateExercises(@RequestBody List<NewExerciseDto> newExerciseDtos) {
+    public ResponseEntity<List<ExerciseDTO>> bulkCreateExercises(@RequestBody List<@Valid NewExerciseDto> newExerciseDtos) {
         List<ExerciseDTO> dtos = exerciseService.bulkCreateExercises(newExerciseDtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtos);
     }

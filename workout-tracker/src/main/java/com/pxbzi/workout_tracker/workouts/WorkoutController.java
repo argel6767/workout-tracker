@@ -12,6 +12,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/workouts")
@@ -22,13 +23,13 @@ public class WorkoutController {
     private final WorkoutService workoutService;
 
     @PostMapping()
-    public ResponseEntity<WorkoutDto> createWorkout(@RequestBody NewWorkoutDto newWorkoutDto) {
+    public ResponseEntity<WorkoutDto> createWorkout(@Valid @RequestBody NewWorkoutDto newWorkoutDto) {
         WorkoutDto dto =  workoutService.createWorkout(newWorkoutDto);
         return ResponseEntity.created(getLocation(dto)).body(dto);
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<WorkoutDto>> createWorkouts(@RequestBody List<NewWorkoutDto> newWorkoutDtos) {
+    public ResponseEntity<List<WorkoutDto>> createWorkouts(@RequestBody List<@Valid NewWorkoutDto> newWorkoutDtos) {
         List<WorkoutDto> dtos = workoutService.bulkCreateWorkouts(newWorkoutDtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(dtos);
     }

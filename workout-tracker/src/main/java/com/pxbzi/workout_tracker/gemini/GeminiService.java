@@ -1,6 +1,5 @@
 package com.pxbzi.workout_tracker.gemini;
 
-import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.Content;
@@ -19,12 +18,12 @@ import java.time.LocalDateTime;
 @Log
 public class GeminiService {
 
-    private final Client client;
+    private final GeminiGateway gateway;
     private final GenerateContentConfig generateContentConfig;
     private final String GEMINI_MODEL = "gemini-2.5-flash";
 
     public ChatResponseDto getChatResponseDto(String query) {
-        GenerateContentResponse response = client.models.generateContent(GEMINI_MODEL, query, generateContentConfig);
+        GenerateContentResponse response = gateway.generate(GEMINI_MODEL, query, generateContentConfig);
         return toChatResponseDto(response);
     }
 
@@ -41,7 +40,7 @@ public class GeminiService {
                 .thinkingConfig(ThinkingConfig.builder().thinkingBudget(0))
                 .systemInstruction(systemInstruction)
                 .build();
-        GenerateContentResponse response = client.models.generateContent(GEMINI_MODEL, query, conciseConfig);
+        GenerateContentResponse response = gateway.generate(GEMINI_MODEL, query, conciseConfig);
         return toChatResponseDto(response);
     }
 

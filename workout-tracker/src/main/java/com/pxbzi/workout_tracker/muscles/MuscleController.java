@@ -10,6 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/muscles")
@@ -20,7 +21,7 @@ public class MuscleController {
     private final MuscleService muscleService;
 
     @PostMapping()
-    public ResponseEntity<MuscleDto> createMuscle(@RequestBody NewMuscleDto newMuscleDto) {
+    public ResponseEntity<MuscleDto> createMuscle(@Valid @RequestBody NewMuscleDto newMuscleDto) {
         MuscleDto dto = muscleService.createMuscle(newMuscleDto);
         return ResponseEntity
                 .created(getLocation(dto))
@@ -28,7 +29,7 @@ public class MuscleController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<List<MuscleDto>> bulkCreateMuscles(@RequestBody List<NewMuscleDto> newMuscleDtos) {
+    public ResponseEntity<List<MuscleDto>> bulkCreateMuscles(@RequestBody List<@Valid NewMuscleDto> newMuscleDtos) {
         List<MuscleDto> dtos = muscleService.bulkCreateMuscles(newMuscleDtos);
         return ResponseEntity.ok(dtos);
     }

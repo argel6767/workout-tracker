@@ -1,4 +1,8 @@
 package com.pxbzi.workout_tracker.workout_sets.models;
 
-public record NewSetDto(Integer reps, Double weight) {
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
+public record NewSetDto(@NotNull @Positive Integer reps, @NotNull @PositiveOrZero Double weight) {
 }

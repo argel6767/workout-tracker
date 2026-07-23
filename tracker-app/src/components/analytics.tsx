@@ -62,11 +62,12 @@ export const AnalyticsContainer = () => {
                 className="btn btn-square"
                 onClick={decreaseMonthsBack}
                 disabled={numMonthsBack <= 1}
+                aria-label="Decrease months back"
               >
                 -
               </button>
               <span>{numMonthsBack}</span>
-              <button className="btn btn-square" onClick={increaseMonthsBack}>
+              <button className="btn btn-square" onClick={increaseMonthsBack} aria-label="Increase months back">
                 +
               </button>
             </span>

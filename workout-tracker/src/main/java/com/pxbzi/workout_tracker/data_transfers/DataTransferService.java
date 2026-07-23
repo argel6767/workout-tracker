@@ -32,6 +32,7 @@ public class DataTransferService {
     private final ExerciseRepository exerciseRepository;
     private final ObjectMapper objectMapper;
 
+    @Transactional(readOnly = true)
     public DataExportDto exportData() {
         List<WorkoutTransferDto> workouts = workoutRepository.findAll().stream()
                 .map(WorkoutTransferDto::of)
@@ -48,6 +49,7 @@ public class DataTransferService {
         return new DataExportDto(workouts, exercises, muscles);
     }
 
+    @Transactional(readOnly = true)
     public byte[] exportDataAsFile() throws IOException {
         DataExportDto data = exportData();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(data);

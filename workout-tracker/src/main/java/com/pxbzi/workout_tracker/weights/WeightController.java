@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/weights")
@@ -15,7 +16,7 @@ public class WeightController {
     private final WeightService weightService;
 
     @PostMapping()
-    public WeightDto createWeight(@RequestBody NewWeightDto weightDto) {
+    public WeightDto createWeight(@Valid @RequestBody NewWeightDto weightDto) {
         return weightService.createWeight(weightDto);
     }
     

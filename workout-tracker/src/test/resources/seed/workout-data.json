@@ -1,0 +1,25 @@
+{
+  "workouts": [
+    {
+      "exercise": "Bench Press",
+      "sets": [
+        { "reps": 8, "weight": 135.0 },
+        { "reps": 5, "weight": 155.0 }
+      ],
+      "workoutDate": "2026-07-20"
+    }
+  ],
+  "exercises": [
+    {
+      "name": "Bench Press",
+      "description": "Barbell chest press",
+      "musclesWorked": ["Pectoralis Major", "Triceps"],
+      "primaryMuscle": "Pectoralis Major",
+      "exerciseType": "FREE_WEIGHT"
+    }
+  ],
+  "muscles": [
+    { "name": "Pectoralis Major", "muscleGroup": "CHEST" },
+    { "name": "Triceps", "muscleGroup": "ARMS" }
+  ]
+}

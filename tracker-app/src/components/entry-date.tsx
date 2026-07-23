@@ -8,8 +8,8 @@ type EntryDateFormProps = {
 export const EntryDateForm = ({ date, onDateChange }: EntryDateFormProps) => {
   return (
     <main className="flex flex-col gap-3 py-2">
-      <h3 className="text-lg">Add entry date (optional)</h3>
-      <input type="date" value={date as string} onChange={onDateChange} />
+      <label className="text-lg" htmlFor="entry-date">Add entry date (optional)</label>
+      <input id="entry-date" type="date" value={date ?? ''} onChange={onDateChange} />
     </main>
   );
 };

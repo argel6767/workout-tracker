@@ -63,10 +63,11 @@ export const WorkoutForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (newWorkout.workoutDate === "") {
-        newWorkout.workoutDate = null;
-      }
-      const response = await createWorkout(newWorkout);
+      const workoutToCreate = {
+        ...newWorkout,
+        workoutDate: newWorkout.workoutDate === "" ? null : newWorkout.workoutDate,
+      };
+      const response = await createWorkout(workoutToCreate);
       console.log("Workout created:", response);
       queryClient.clear();
       setNewWorkout({
@@ -379,10 +380,11 @@ export const WeightForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (newWeight.entryDate === "") {
-        newWeight.entryDate = null;
-      }
-      const response = await createWeight(newWeight);
+      const weightToCreate = {
+        ...newWeight,
+        entryDate: newWeight.entryDate === "" ? null : newWeight.entryDate,
+      };
+      const response = await createWeight(weightToCreate);
       queryClient.clear();
       setNewWeight({
         weight: 0,

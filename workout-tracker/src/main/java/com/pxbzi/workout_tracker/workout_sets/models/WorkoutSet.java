@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(indexes = {
     @Index(name = "idx_set_workout_id", columnList = "workout_id")
-}, name = "set")
+}, name = "\"set\"")
 @Data
 @NoArgsConstructor
 public class WorkoutSet {
