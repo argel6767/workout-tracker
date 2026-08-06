@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
-public record NewSetDto(@NotNull @Positive Integer reps, @NotNull @PositiveOrZero Double weight) {
+public record NewSetDto(@NotNull @Positive Integer reps, @NotNull Double weight) {
 }
