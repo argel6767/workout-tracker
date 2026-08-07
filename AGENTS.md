@@ -14,6 +14,29 @@ This is a full-stack workout tracker with two applications:
 
 Before changing code, read the relevant build configuration, nearby source files, and nearby tests. Preserve unrelated user changes and never commit secrets, `.env` files, generated build output, or dependency directories.
 
+## Precedence when instructions conflict
+
+If the user's direct request conflicts with a rule in this file (for example, asking to skip tests, skip the plan, or make a change outside the documented architecture), follow the user's explicit instruction for that request, but say plainly which rule is being set aside and why, rather than silently complying or silently overriding the user. Do not use this to justify skipping secret-safety, destructive-command, or contract-sync rules unless the user is explicit and specific about that exact tradeoff — general urgency ("just get this done fast") is not sufficient to waive those.
+
+## Plan before writing any code
+
+Before writing a single test or line of implementation, produce a short, explicit, step-by-step plan and share it as part of your response. This applies to every code change, not just large ones — but the plan should be proportionate to the change. A one-line fix or single-assertion addition needs only a few lines covering what's changing and why; a multi-file or cross-stack change needs the fuller treatment below. Do not pad a small plan to hit every bullet below if it isn't relevant.
+
+For non-trivial changes, the plan should cover:
+
+1. State the requested behavior change in one or two sentences, including any assumptions made about ambiguous requirements.
+2. Identify the affected layer(s) (controller/service/repository/model on the backend; api/hooks/components/lib on the frontend) and the specific files expected to change or be added.
+3. Identify cross-stack or cross-file contracts touched (DTOs, API routes, query keys, shared types) and how both sides will stay in sync.
+4. Name the observable assertion(s) the test-first workflow will encode, and at what test level (unit, MockMvc/integration, component, e2e) each belongs.
+5. Call out domain invariants from `README.md` that apply (ownership, primary-muscle membership, bodyweight calculations, date semantics, weekly analytics) and how the plan preserves them.
+6. Flag any open questions, risks, or reasons the change might need to touch more than the scoped area, before proceeding.
+
+Do not begin the test-first workflow (writing the failing test) until this plan has been stated. If the task is trivial (pure documentation, formatting, or a one-line config change explicitly exempted under "Required test-first workflow"), a one-line plan stating why it's exempt is sufficient — but it must still be stated, not skipped silently.
+
+If, while implementing, the actual change diverges from the stated plan (e.g., a new file needs touching, a different test level is required, or the fix requires a schema migration or module outside the original scope), stop, state the justification, and check whether the expansion is still within the spirit of the original request. If the expansion is minor and clearly necessary (e.g., updating a second DTO to keep a contract in sync), proceed and report it in the step update. If the expansion is significant (new module, schema migration, new dependency, or anything "Change discipline" would flag as a broad rewrite), pause and ask the user before proceeding rather than expanding scope unilaterally.
+
+After completing each step of the plan, post a brief update (1-3 sentences) confirming what was done and its result (e.g., "Step 2: added failing test `WorkoutServiceTest.rejectsSetOwnedByAnotherUser` — confirmed it fails with the expected assertion error"). If a step's outcome forces a change to a later step or to the plan itself, state the justification for the shift at that point, before continuing — do not silently adjust course and explain everything retroactively at handoff.
+
 ## Required test-first workflow
 
 All agents MUST use test-driven development for behavior changes and bug fixes.
@@ -93,6 +116,8 @@ On macOS/Linux:
 Use `mvn clean test` when a clean backend build is important. The Testcontainers PostgreSQL test runs when Docker is available and otherwise skips. Mutation analysis and k6 smoke tests are optional unless the change is high-risk or explicitly requests them; see `workout-tracker/TESTING.md`.
 
 Playwright starts both applications and requires Java 21, frontend dependencies, and a Chromium installation. Do not claim a check passed unless it was actually run. In the final handoff, list tests/checks run, their results, and any checks not run with the reason.
+
+The final handoff must also reconcile the work against the original plan: confirm each planned step was completed as stated, note any step that shifted along with its justification (cross-referencing the in-progress update where it was first raised), and flag any planned step that was ultimately skipped or not needed.
 
 ## Change discipline
 
