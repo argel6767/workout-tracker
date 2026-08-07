@@ -1,10 +1,8 @@
 package com.pxbzi.workout_tracker.analytics;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxbzi.workout_tracker.analytics.models.NormalizedStrengthAnalysisDto;
 import com.pxbzi.workout_tracker.exercises.models.Exercise;
 import com.pxbzi.workout_tracker.exercises.models.ExerciseType;
-import com.pxbzi.workout_tracker.gemini.GeminiService;
 import com.pxbzi.workout_tracker.muscles.MuscleService;
 import com.pxbzi.workout_tracker.muscles.models.MuscleGroup;
 import com.pxbzi.workout_tracker.muscles.models.MuscleDto;
@@ -26,7 +24,8 @@ import static org.mockito.Mockito.when;
 
 class AnalyticsServiceTest {
 
-    private AnalyticsService service;
+    private StrengthAnalyticsService strengthService;
+    private VolumeAnalyticsService volumeService;
     private WorkoutService workoutService;
     private MuscleService muscleService;
 
@@ -34,24 +33,26 @@ class AnalyticsServiceTest {
     void setUp() {
         workoutService = mock(WorkoutService.class);
         muscleService = mock(MuscleService.class);
-        service = new AnalyticsService(
+        WorkoutSetRepository workoutSetRepository = mock(WorkoutSetRepository.class);
+        WeightService weightService = mock(WeightService.class);
+        strengthService = new StrengthAnalyticsService(
                 workoutService,
-                mock(WorkoutSetRepository.class),
-                mock(WeightService.class),
-                mock(GeminiService.class),
-                new ObjectMapper(),
+                workoutSetRepository,
+                weightService,
                 muscleService
         );
+        volumeService = new VolumeAnalyticsService(
+                workoutService, workoutSetRepository, weightService, muscleService);
     }
 
     @Test
     void weeklyVolumeRequiresExactlyOneTarget() {
-        assertThatThrownBy(() -> service.getWeeklyVolumeAnalysis(
+        assertThatThrownBy(() -> volumeService.getWeeklyVolumeAnalysis(
                 null, null, LocalDate.now(), 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("either muscleId or muscleGroup");
 
-        assertThatThrownBy(() -> service.getWeeklyVolumeAnalysis(
+        assertThatThrownBy(() -> volumeService.getWeeklyVolumeAnalysis(
                 1L, MuscleGroup.CHEST, LocalDate.now(), 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("either muscleId or muscleGroup");
@@ -59,7 +60,7 @@ class AnalyticsServiceTest {
 
     @Test
     void weeklyVolumeRequiresPositiveLookback() {
-        assertThatThrownBy(() -> service.getWeeklyVolumeAnalysis(
+        assertThatThrownBy(() -> volumeService.getWeeklyVolumeAnalysis(
                 null, MuscleGroup.CHEST, LocalDate.now(), 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("at least 1");
@@ -67,7 +68,7 @@ class AnalyticsServiceTest {
 
     @Test
     void strongestOverviewRequiresAtLeastOneCategory() {
-        assertThatThrownBy(() -> service.getAllStrongestExercises(false, false))
+        assertThatThrownBy(() -> strengthService.getAllStrongestExercises(false, false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("At least one");
     }
@@ -87,7 +88,7 @@ class AnalyticsServiceTest {
         when(workoutService.getWorkoutsByMuscleThroughDate(7L, LocalDate.of(2026, 8, 9)))
                 .thenReturn(workouts);
 
-        NormalizedStrengthAnalysisDto analysis = service.getNormalizedStrengthAnalysis(
+        NormalizedStrengthAnalysisDto analysis = strengthService.getNormalizedStrengthAnalysis(
                 7L, null, reportDate, 2);
 
         assertThat(analysis.targetName()).isEqualTo("Biceps");
@@ -100,7 +101,7 @@ class AnalyticsServiceTest {
 
     @Test
     void normalizedStrengthRequiresPositiveLookback() {
-        assertThatThrownBy(() -> service.getNormalizedStrengthAnalysis(
+        assertThatThrownBy(() -> strengthService.getNormalizedStrengthAnalysis(
                 7L, null, LocalDate.of(2026, 8, 5), 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("at least 1");
@@ -116,7 +117,7 @@ class AnalyticsServiceTest {
                         workout(1L, curl, LocalDate.of(2026, 7, 1), set(0, 10)),
                         workout(2L, curl, LocalDate.of(2026, 7, 30), set(75, 10))));
 
-        NormalizedStrengthAnalysisDto analysis = service.getNormalizedStrengthAnalysis(
+        NormalizedStrengthAnalysisDto analysis = strengthService.getNormalizedStrengthAnalysis(
                 7L, null, reportDate, 2);
 
         assertThat(analysis.trend()).isEmpty();
@@ -132,7 +133,7 @@ class AnalyticsServiceTest {
                         workout(1L, row, LocalDate.of(2026, 7, 1), set(75, 10)),
                         workout(2L, row, LocalDate.of(2026, 7, 30), set(90, 10))));
 
-        NormalizedStrengthAnalysisDto analysis = service.getNormalizedStrengthAnalysis(
+        NormalizedStrengthAnalysisDto analysis = strengthService.getNormalizedStrengthAnalysis(
                 null, MuscleGroup.BACK, reportDate, 2);
 
         assertThat(analysis.muscleId()).isNull();
@@ -146,14 +147,14 @@ class AnalyticsServiceTest {
     void normalizedStrengthRequiresExactlyOneTargetAndIndividualArmMuscle() {
         LocalDate date = LocalDate.of(2026, 8, 5);
 
-        assertThatThrownBy(() -> service.getNormalizedStrengthAnalysis(null, null, date, 5))
+        assertThatThrownBy(() -> strengthService.getNormalizedStrengthAnalysis(null, null, date, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("either muscleId or muscleGroup");
-        assertThatThrownBy(() -> service.getNormalizedStrengthAnalysis(
+        assertThatThrownBy(() -> strengthService.getNormalizedStrengthAnalysis(
                 7L, MuscleGroup.BACK, date, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("either muscleId or muscleGroup");
-        assertThatThrownBy(() -> service.getNormalizedStrengthAnalysis(
+        assertThatThrownBy(() -> strengthService.getNormalizedStrengthAnalysis(
                 null, MuscleGroup.ARMS, date, 5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("muscleId");

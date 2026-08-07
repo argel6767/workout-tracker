@@ -70,7 +70,7 @@ workout-tracker/
 |   `-- src/lib/                # Shared TypeScript DTOs
 `-- workout-tracker/            # Spring Boot backend
     `-- src/main/java/com/pxbzi/workout_tracker/
-        |-- analytics/
+        |-- analytics/          # Focused progress, strength, volume, and AI insight services
         |-- data_transfers/
         |-- exercises/
         |-- gemini/
@@ -81,6 +81,8 @@ workout-tracker/
 ```
 
 The backend is organized by domain. Controllers delegate to services, services own business logic and repository access, and API responses use dedicated DTOs. The frontend separates API functions, query hooks, DTO types, and rendering components.
+
+Within the analytics domain, `AnalyticsService` is a compatibility facade over focused exercise-progress, strength, volume, and AI-insight services. Fitness formulas live in a pure calculation helper, while `GeminiService` is limited to provider communication and response mapping.
 
 ## Quick start with Docker Compose
 
