@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   NewExerciseDto,
   NewMuscleDto,
@@ -16,12 +16,42 @@ import { queryClient } from "../api/queryClient";
 import { ExerciseData } from "./exercise-data";
 import { EntryDateForm } from "./entry-date";
 
+type SubmissionStatus = { type: "success" | "error"; message: string } | null;
+const FEEDBACK_DURATION_MS = 3500;
+
+const useSubmissionStatus = () => {
+  const [status, setStatus] = useState<SubmissionStatus>(null);
+
+  useEffect(() => {
+    if (!status) return;
+
+    const timeoutId = window.setTimeout(() => setStatus(null), FEEDBACK_DURATION_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [status]);
+
+  return [status, setStatus] as const;
+};
+
+const SubmissionFeedback = ({ status }: { status: SubmissionStatus }) => {
+  if (!status) return null;
+
+  return (
+    <div
+      className={`alert ${status.type === "success" ? "alert-success" : "alert-error"}`}
+      role={status.type === "success" ? "status" : "alert"}
+    >
+      {status.message}
+    </div>
+  );
+};
+
 export const WorkoutForm = () => {
   const [newWorkout, setNewWorkout] = useState<NewWorkoutDto>({
     exerciseId: -1,
     sets: [],
     workoutDate: null
   });
+  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
 
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setNewWorkout((prev) => ({
@@ -62,21 +92,22 @@ export const WorkoutForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionStatus(null);
     try {
       const workoutToCreate = {
         ...newWorkout,
         workoutDate: newWorkout.workoutDate === "" ? null : newWorkout.workoutDate,
       };
-      const response = await createWorkout(workoutToCreate);
-      console.log("Workout created:", response);
+      await createWorkout(workoutToCreate);
       queryClient.clear();
       setNewWorkout({
         exerciseId: -1,
         sets: [],
         workoutDate: ""
-      })
-    } catch (error) {
-      console.error("Error creating workout:", error);
+      });
+      setSubmissionStatus({ type: "success", message: "Workout created successfully." });
+    } catch {
+      setSubmissionStatus({ type: "error", message: "Unable to create workout. Please try again." });
     }
   };
 
@@ -141,6 +172,7 @@ export const WorkoutForm = () => {
         <button type="submit" className="btn btn-primary">
           Add Workout
         </button>
+        <SubmissionFeedback status={submissionStatus} />
       </form>
     </main>
   );
@@ -151,6 +183,7 @@ export const MuscleForm = () => {
     name: "",
     muscleGroup: "CHEST",
   });
+  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMuscle((prev) => ({ ...prev, name: e.target.value }));
@@ -165,16 +198,17 @@ export const MuscleForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionStatus(null);
     try {
-      const response = await createMuscle(newMuscle);
-      console.log("Muscle created:", response);
+      await createMuscle(newMuscle);
       queryClient.clear();
       setNewMuscle({
         name: "",
         muscleGroup: "CHEST",
       });
-    } catch (error) {
-      console.error("Error creating muscle:", error);
+      setSubmissionStatus({ type: "success", message: "Muscle created successfully." });
+    } catch {
+      setSubmissionStatus({ type: "error", message: "Unable to create muscle. Please try again." });
     }
   };
 
@@ -212,6 +246,7 @@ export const MuscleForm = () => {
         <button type="submit" className="btn btn-primary">
           Add Muscle
         </button>
+        <SubmissionFeedback status={submissionStatus} />
       </form>
     </main>
   );
@@ -225,6 +260,7 @@ export const ExerciseForm = () => {
     primaryMuscleId: -1,
     exerciseType: "BODYWEIGHT"
   });
+  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
 
   const { data: availableMuscles, isLoading, isError } = useGetMuscles();
 
@@ -257,9 +293,9 @@ export const ExerciseForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionStatus(null);
     try {
-      const response = await createExercise(newExercise);
-      console.log("Exercise created:", response);
+      await createExercise(newExercise);
       queryClient.clear();
       setNewExercise({
         name: "",
@@ -268,8 +304,9 @@ export const ExerciseForm = () => {
         primaryMuscleId: -1,
         exerciseType: "BODYWEIGHT"
       });
-    } catch (error) {
-      console.error("Error creating exercise:", error);
+      setSubmissionStatus({ type: "success", message: "Exercise created successfully." });
+    } catch {
+      setSubmissionStatus({ type: "error", message: "Unable to create exercise. Please try again." });
     }
   };
 
@@ -358,6 +395,7 @@ export const ExerciseForm = () => {
         >
           Add Exercise
         </button>
+        <SubmissionFeedback status={submissionStatus} />
       </form>
     </main>
   );
@@ -368,6 +406,7 @@ export const WeightForm = () => {
     weight: 0,
     entryDate: null,
   });
+  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewWeight((prev) => ({ ...prev, weight: Number(e.target.value) }));
@@ -379,20 +418,21 @@ export const WeightForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmissionStatus(null);
     try {
       const weightToCreate = {
         ...newWeight,
         entryDate: newWeight.entryDate === "" ? null : newWeight.entryDate,
       };
-      const response = await createWeight(weightToCreate);
+      await createWeight(weightToCreate);
       queryClient.clear();
       setNewWeight({
         weight: 0,
         entryDate: "",
       });
-      console.log("Weight created:", response);
-    } catch (error) {
-      console.error("Error creating weight:", error);
+      setSubmissionStatus({ type: "success", message: "Weight entry created successfully." });
+    } catch {
+      setSubmissionStatus({ type: "error", message: "Unable to create weight entry. Please try again." });
     }
   };
 
@@ -419,6 +459,7 @@ export const WeightForm = () => {
         <button type="submit" className="btn btn-primary">
           Add Weight
         </button>
+        <SubmissionFeedback status={submissionStatus} />
       </form>
     </main>
   );

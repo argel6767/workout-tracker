@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExerciseForm, FormContainer, MuscleForm, WeightForm, WorkoutForm } from '../../components/forms';
@@ -65,6 +65,7 @@ describe('muscle form', () => {
     await waitFor(() => expect(mocks.createMuscle).toHaveBeenCalledWith({ name: 'Deltoid', muscleGroup: 'SHOULDERS' }));
     expect(mocks.clear).toHaveBeenCalled();
     expect(screen.getByPlaceholderText('Biceps')).toHaveValue('');
+    expect(screen.getByRole('status')).toHaveTextContent('Muscle created successfully.');
   });
 });
 
@@ -85,6 +86,7 @@ describe('exercise form', () => {
       name: 'Curl', description: '', musclesWorked: [7], primaryMuscleId: 7, exerciseType: 'BODYWEIGHT',
     }));
     expect(mocks.clear).toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('Exercise created successfully.');
   });
 });
 
@@ -105,6 +107,7 @@ describe('workout form', () => {
       exerciseId: 5, sets: [{ weight: 135, reps: 8 }], workoutDate: null,
     }));
     expect(mocks.clear).toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('Workout created successfully.');
   });
 
   it('removes a set and converts an empty optional date to null', async () => {
@@ -133,11 +136,11 @@ describe('weight form', () => {
     await waitFor(() => expect(mocks.createWeight).toHaveBeenCalledWith({ weight: 182.5, entryDate: null }));
     expect(mocks.clear).toHaveBeenCalled();
     expect(input).toHaveValue(0);
+    expect(screen.getByRole('status')).toHaveTextContent('Weight entry created successfully.');
   });
 
   it('preserves entered data and does not clear the cache when submission fails', async () => {
     const user = userEvent.setup();
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     mocks.createWeight.mockRejectedValueOnce(new Error('unavailable'));
     render(<WeightForm />);
 
@@ -146,9 +149,21 @@ describe('weight form', () => {
     await user.type(input, '190');
     await user.click(screen.getByRole('button', { name: 'Add Weight' }));
 
-    await waitFor(() => expect(consoleError).toHaveBeenCalled());
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to create weight entry. Please try again.');
     expect(input).toHaveValue(190);
     expect(mocks.clear).not.toHaveBeenCalled();
-    consoleError.mockRestore();
+  });
+
+  it('automatically dismisses submission feedback', async () => {
+    vi.useFakeTimers();
+    render(<WeightForm />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add Weight' }));
+    await act(async () => undefined);
+    expect(screen.getByRole('status')).toHaveTextContent('Weight entry created successfully.');
+
+    act(() => vi.advanceTimersByTime(4000));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 });
