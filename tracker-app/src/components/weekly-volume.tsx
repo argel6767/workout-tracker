@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Bar,
   CartesianGrid,
@@ -14,22 +14,26 @@ import {
 import { useGetMuscles } from "../hooks/useGetMuscles";
 import { useGetWeeklyVolumeAnalysis } from "../hooks/useGetWeeklyVolumeAnalysis";
 import { useGetWeeklyVolumeAiAnalysis } from "../hooks/useGetWeeklyVolumeAiAnalysis";
-import type { MuscleGroup } from "../lib/form-dtos";
+import { useAnalyticsFilters } from "../hooks/useAnalyticsFilters";
+import { LookbackStepper, MuscleTargetFilters } from "./analytics-filters";
+import { formatAnalyticsLabel } from "../lib/analytics-formatters";
 import { AiAnalysisCard } from "./card";
-
-const MUSCLE_GROUPS: MuscleGroup[] = ["CHEST", "BACK", "SHOULDERS", "LEGS", "ARMS", "CORE"];
-
-const formatLabel = (value: string) =>
-  value.toLowerCase().replace(/(^|[-_])\w/g, (letter) => letter.toUpperCase()).replaceAll("_", " ");
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value);
 
 export const WeeklyVolumeAnalytics = () => {
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>("CHEST");
-  const [muscleId, setMuscleId] = useState<number | undefined>();
-  const [numWeeksBack, setNumWeeksBack] = useState(5);
   const { data: muscles = [], isLoading: musclesLoading } = useGetMuscles();
+  const {
+    muscleGroup,
+    muscleId,
+    lookback: numWeeksBack,
+    filteredMuscles,
+    changeMuscleGroup,
+    setMuscleId,
+    decreaseLookback,
+    increaseLookback,
+  } = useAnalyticsFilters(muscles);
   const { data, isLoading, isError } = useGetWeeklyVolumeAnalysis(
     muscleGroup,
     muscleId,
@@ -40,11 +44,6 @@ export const WeeklyVolumeAnalytics = () => {
     isLoading: aiLoading,
     isError: aiError,
   } = useGetWeeklyVolumeAiAnalysis(muscleGroup, muscleId, numWeeksBack);
-
-  const filteredMuscles = useMemo(
-    () => muscles.filter((muscle) => muscle.muscleGroup === muscleGroup),
-    [muscles, muscleGroup],
-  );
 
   const chartData = useMemo(() => {
     if (!data?.weeklyChanges.length) return [];
@@ -64,47 +63,21 @@ export const WeeklyVolumeAnalytics = () => {
   return (
     <main className="flex flex-col gap-6">
       <div className="flex flex-wrap justify-center gap-4">
-        <label className="input">
-          <span className="label">Muscle Group</span>
-          <select
-            className="bg-base-200 rounded-lg p-1"
-            value={muscleGroup}
-            onChange={(event) => {
-              setMuscleGroup(event.target.value as MuscleGroup);
-              setMuscleId(undefined);
-            }}
-          >
-            {MUSCLE_GROUPS.map((group) => (
-              <option key={group} value={group}>{formatLabel(group)}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="input">
-          <span className="label">Specific Muscle</span>
-          <select
-            className="bg-base-200 rounded-lg p-1"
-            value={muscleId ?? ""}
-            disabled={musclesLoading}
-            onChange={(event) => setMuscleId(event.target.value ? Number(event.target.value) : undefined)}
-          >
-            <option value="">All {formatLabel(muscleGroup)}</option>
-            {filteredMuscles.map((muscle) => (
-              <option key={muscle.id} value={muscle.id}>{muscle.name}</option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-2 text-lg">
-          Weeks Back
-          <span className="flex gap-2 items-center">
-            <button className="btn btn-square" disabled={numWeeksBack <= 1}
-              onClick={() => setNumWeeksBack((weeks) => weeks - 1)}>-</button>
-            <span className="min-w-6 text-center">{numWeeksBack}</span>
-            <button className="btn btn-square"
-              onClick={() => setNumWeeksBack((weeks) => weeks + 1)}>+</button>
-          </span>
-        </label>
+        <MuscleTargetFilters
+          muscleGroup={muscleGroup}
+          muscleId={muscleId}
+          filteredMuscles={filteredMuscles}
+          musclesLoading={musclesLoading}
+          changeMuscleGroup={changeMuscleGroup}
+          setMuscleId={setMuscleId}
+          musclePlaceholder={`All ${formatAnalyticsLabel(muscleGroup)}`}
+        />
+        <LookbackStepper
+          label="Weeks Back"
+          value={numWeeksBack}
+          onDecrease={decreaseLookback}
+          onIncrease={increaseLookback}
+        />
       </div>
 
       {isLoading && <span className="loading loading-dots loading-xl self-center" />}

@@ -1,31 +1,31 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useGetMuscles } from "../hooks/useGetMuscles";
 import { useGetWeeklyOneRepMaxAnalysis } from "../hooks/useGetWeeklyOneRepMaxAnalysis";
 import { useGetWeeklyOneRepMaxAiAnalysis } from "../hooks/useGetWeeklyOneRepMaxAiAnalysis";
-import type { MuscleGroup } from "../lib/form-dtos";
+import { useAnalyticsFilters } from "../hooks/useAnalyticsFilters";
+import { LookbackStepper, MuscleTargetFilters } from "./analytics-filters";
 import { AiAnalysisCard } from "./card";
 
-const MUSCLE_GROUPS: MuscleGroup[] = ["CHEST", "BACK", "SHOULDERS", "LEGS", "ARMS", "CORE"];
 const COLORS = ["#8884d8", "#00c49f", "#ffbb28", "#ff8042", "#0088fe", "#ff7c7c", "#82ca9d"];
-const formatLabel = (value: string) =>
-  value.toLowerCase().replace(/(^|[-_])\w/g, (letter) => letter.toUpperCase()).replaceAll("_", " ");
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value);
 
 export const WeeklyOneRepMaxAnalytics = () => {
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>("CHEST");
-  const [muscleId, setMuscleId] = useState<number | undefined>();
-  const [numWeeksBack, setNumWeeksBack] = useState(5);
   const { data: muscles = [], isLoading: musclesLoading } = useGetMuscles();
+  const {
+    muscleGroup,
+    muscleId,
+    lookback: numWeeksBack,
+    filteredMuscles,
+    changeMuscleGroup,
+    setMuscleId,
+    decreaseLookback,
+    increaseLookback,
+  } = useAnalyticsFilters(muscles);
   const { data, isLoading, isError } = useGetWeeklyOneRepMaxAnalysis(muscleId, numWeeksBack);
   const { data: aiAnalysis, isLoading: aiLoading, isError: aiError } =
     useGetWeeklyOneRepMaxAiAnalysis(muscleId, numWeeksBack);
-
-  const filteredMuscles = useMemo(
-    () => muscles.filter((muscle) => muscle.muscleGroup === muscleGroup),
-    [muscles, muscleGroup],
-  );
 
   const chartData = useMemo(() => {
     const weeks = new Map<string, Record<string, string | number | null>>();
@@ -49,33 +49,22 @@ export const WeeklyOneRepMaxAnalytics = () => {
   return (
     <main className="flex flex-col gap-6">
       <div className="flex flex-wrap justify-center gap-4">
-        <label className="input">
-          <span className="label">Muscle Group</span>
-          <select className="bg-base-200 rounded-lg p-1" value={muscleGroup}
-            onChange={(event) => {
-              setMuscleGroup(event.target.value as MuscleGroup);
-              setMuscleId(undefined);
-            }}>
-            {MUSCLE_GROUPS.map((group) => <option key={group} value={group}>{formatLabel(group)}</option>)}
-          </select>
-        </label>
-        <label className="input">
-          <span className="label">Muscle</span>
-          <select className="bg-base-200 rounded-lg p-1" value={muscleId ?? ""} disabled={musclesLoading}
-            onChange={(event) => setMuscleId(event.target.value ? Number(event.target.value) : undefined)}>
-            <option value="">Select a muscle</option>
-            {filteredMuscles.map((muscle) => <option key={muscle.id} value={muscle.id}>{muscle.name}</option>)}
-          </select>
-        </label>
-        <label className="flex flex-col gap-2 text-lg">
-          Weeks Back
-          <span className="flex gap-2 items-center">
-            <button className="btn btn-square" disabled={numWeeksBack <= 1}
-              onClick={() => setNumWeeksBack((weeks) => weeks - 1)}>-</button>
-            <span className="min-w-6 text-center">{numWeeksBack}</span>
-            <button className="btn btn-square" onClick={() => setNumWeeksBack((weeks) => weeks + 1)}>+</button>
-          </span>
-        </label>
+        <MuscleTargetFilters
+          muscleGroup={muscleGroup}
+          muscleId={muscleId}
+          filteredMuscles={filteredMuscles}
+          musclesLoading={musclesLoading}
+          changeMuscleGroup={changeMuscleGroup}
+          setMuscleId={setMuscleId}
+          muscleLabel="Muscle"
+          musclePlaceholder="Select a muscle"
+        />
+        <LookbackStepper
+          label="Weeks Back"
+          value={numWeeksBack}
+          onDecrease={decreaseLookback}
+          onIncrease={increaseLookback}
+        />
       </div>
 
       {!muscleId && <div className="text-xl text-center">Select a muscle to compare estimated one-rep maxes</div>}

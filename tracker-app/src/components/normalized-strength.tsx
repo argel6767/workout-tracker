@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -11,12 +10,8 @@ import {
 } from "recharts";
 import { useGetMuscles } from "../hooks/useGetMuscles";
 import { useGetNormalizedStrengthAnalysis } from "../hooks/useGetNormalizedStrengthAnalysis";
-import type { MuscleDto, MuscleGroup } from "../lib/form-dtos";
-
-const MUSCLE_GROUPS: MuscleGroup[] = ["CHEST", "BACK", "SHOULDERS", "LEGS", "ARMS", "CORE"];
-
-const formatLabel = (value: string) =>
-  value.toLowerCase().replace(/(^|[-_])\w/g, (letter) => letter.toUpperCase()).replaceAll("_", " ");
+import { useAnalyticsFilters } from "../hooks/useAnalyticsFilters";
+import { LookbackStepper, MuscleTargetFilters } from "./analytics-filters";
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(value);
@@ -28,76 +23,45 @@ const formatBaselineDifference = (strengthIndex: number) => {
 };
 
 export const NormalizedStrengthAnalytics = () => {
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>("CHEST");
-  const [muscleId, setMuscleId] = useState<number | undefined>();
-  const [numWeeksBack, setNumWeeksBack] = useState(5);
   const { data: muscles = [], isLoading: musclesLoading } = useGetMuscles();
+  const {
+    muscleGroup,
+    muscleId,
+    lookback: numWeeksBack,
+    filteredMuscles,
+    changeMuscleGroup,
+    setMuscleId,
+    decreaseLookback,
+    increaseLookback,
+  } = useAnalyticsFilters(muscles);
   const { data, isLoading, isError } = useGetNormalizedStrengthAnalysis(
     muscleGroup,
     muscleId,
     numWeeksBack,
   );
 
-  const filteredMuscles = useMemo(
-    () => muscles.filter((muscle: MuscleDto) => muscle.muscleGroup === muscleGroup),
-    [muscles, muscleGroup],
-  );
   const requiresArmMuscle = muscleGroup === "ARMS" && muscleId === undefined;
   const latestPoint = data?.trend.at(-1);
 
   return (
     <main className="flex flex-col gap-6">
       <div className="flex flex-wrap justify-center gap-4">
-        <label className="input">
-          <span className="label">Muscle Group</span>
-          <select
-            className="bg-base-200 rounded-lg p-1"
-            value={muscleGroup}
-            onChange={(event) => {
-              setMuscleGroup(event.target.value as MuscleGroup);
-              setMuscleId(undefined);
-            }}
-          >
-            {MUSCLE_GROUPS.map((group) => (
-              <option key={group} value={group}>{formatLabel(group)}</option>
-            ))}
-          </select>
-        </label>
-
-        {muscleGroup === "ARMS" && (
-          <label className="input">
-            <span className="label">Specific Muscle</span>
-            <select
-              className="bg-base-200 rounded-lg p-1"
-              value={muscleId ?? ""}
-              disabled={musclesLoading}
-              onChange={(event) => setMuscleId(event.target.value ? Number(event.target.value) : undefined)}
-            >
-              <option value="">Select biceps or triceps</option>
-              {filteredMuscles.map((muscle: MuscleDto) => (
-                <option key={muscle.id} value={muscle.id}>{muscle.name}</option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        <label className="flex flex-col gap-2 text-lg">
-          Weeks Back
-          <span className="flex gap-2 items-center">
-            <button
-              className="btn btn-square"
-              disabled={numWeeksBack <= 1}
-              aria-label="Decrease weeks back"
-              onClick={() => setNumWeeksBack((weeks) => weeks - 1)}
-            >-</button>
-            <span className="min-w-6 text-center">{numWeeksBack}</span>
-            <button
-              className="btn btn-square"
-              aria-label="Increase weeks back"
-              onClick={() => setNumWeeksBack((weeks) => weeks + 1)}
-            >+</button>
-          </span>
-        </label>
+        <MuscleTargetFilters
+          muscleGroup={muscleGroup}
+          muscleId={muscleId}
+          filteredMuscles={filteredMuscles}
+          musclesLoading={musclesLoading}
+          changeMuscleGroup={changeMuscleGroup}
+          setMuscleId={setMuscleId}
+          musclePlaceholder="Select biceps or triceps"
+          showMuscle={muscleGroup === "ARMS"}
+        />
+        <LookbackStepper
+          label="Weeks Back"
+          value={numWeeksBack}
+          onDecrease={decreaseLookback}
+          onIncrease={increaseLookback}
+        />
       </div>
 
       {requiresArmMuscle && (

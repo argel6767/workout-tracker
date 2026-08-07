@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   NewExerciseDto,
   NewMuscleDto,
@@ -15,35 +15,8 @@ import { createWeight } from "../api/weights";
 import { queryClient } from "../api/queryClient";
 import { ExerciseData } from "./exercise-data";
 import { EntryDateForm } from "./entry-date";
-
-type SubmissionStatus = { type: "success" | "error"; message: string } | null;
-const FEEDBACK_DURATION_MS = 3500;
-
-const useSubmissionStatus = () => {
-  const [status, setStatus] = useState<SubmissionStatus>(null);
-
-  useEffect(() => {
-    if (!status) return;
-
-    const timeoutId = window.setTimeout(() => setStatus(null), FEEDBACK_DURATION_MS);
-    return () => window.clearTimeout(timeoutId);
-  }, [status]);
-
-  return [status, setStatus] as const;
-};
-
-const SubmissionFeedback = ({ status }: { status: SubmissionStatus }) => {
-  if (!status) return null;
-
-  return (
-    <div
-      className={`alert ${status.type === "success" ? "alert-success" : "alert-error"}`}
-      role={status.type === "success" ? "status" : "alert"}
-    >
-      {status.message}
-    </div>
-  );
-};
+import { SubmissionFeedback } from "./submission-feedback";
+import { useSubmissionStatus } from "../hooks/useSubmissionStatus";
 
 export const WorkoutForm = () => {
   const [newWorkout, setNewWorkout] = useState<NewWorkoutDto>({
@@ -51,7 +24,7 @@ export const WorkoutForm = () => {
     sets: [],
     workoutDate: null
   });
-  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
+  const { status: submissionStatus, setStatus: setSubmissionStatus } = useSubmissionStatus();
 
   const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setNewWorkout((prev) => ({
@@ -183,7 +156,7 @@ export const MuscleForm = () => {
     name: "",
     muscleGroup: "CHEST",
   });
-  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
+  const { status: submissionStatus, setStatus: setSubmissionStatus } = useSubmissionStatus();
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMuscle((prev) => ({ ...prev, name: e.target.value }));
@@ -260,7 +233,7 @@ export const ExerciseForm = () => {
     primaryMuscleId: -1,
     exerciseType: "BODYWEIGHT"
   });
-  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
+  const { status: submissionStatus, setStatus: setSubmissionStatus } = useSubmissionStatus();
 
   const { data: availableMuscles, isLoading, isError } = useGetMuscles();
 
@@ -406,7 +379,7 @@ export const WeightForm = () => {
     weight: 0,
     entryDate: null,
   });
-  const [submissionStatus, setSubmissionStatus] = useSubmissionStatus();
+  const { status: submissionStatus, setStatus: setSubmissionStatus } = useSubmissionStatus();
 
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewWeight((prev) => ({ ...prev, weight: Number(e.target.value) }));

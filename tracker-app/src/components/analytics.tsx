@@ -5,6 +5,7 @@ import { SetsByMuscleGroupPieChart, WorkoutBreakdownPieChart } from "./piecharts
 import { WeeklyVolumeAnalytics } from "./weekly-volume";
 import { WeeklyOneRepMaxAnalytics } from "./weekly-one-rep-max";
 import { NormalizedStrengthAnalytics } from "./normalized-strength";
+import { LookbackStepper } from "./analytics-filters";
 
 type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown" | "weeklyVolume" | "weeklyOneRepMax" | "normalizedStrength";
 
@@ -13,14 +14,6 @@ export const AnalyticsContainer = () => {
   const [numMonthsBack, setNumberMonthsBack] = useState<number>(2);
   const [analyticType, setAnalyticType] = useState<AnalyticType>("general");
   const hasDedicatedFilters = analyticType === "weeklyVolume" || analyticType === "weeklyOneRepMax" || analyticType === "normalizedStrength";
-
-  const increaseMonthsBack = () => {
-    setNumberMonthsBack(numMonthsBack + 1);
-  };
-
-  const decreaseMonthsBack = () => {
-    setNumberMonthsBack(numMonthsBack - 1);
-  };
 
   const handleExerciseChange = (
     event: React.ChangeEvent<HTMLSelectElement>,
@@ -56,25 +49,14 @@ export const AnalyticsContainer = () => {
           </select>
         </label>
 
-        {!hasDedicatedFilters && <div>
-          <label className="flex flex-col gap-2 text-lg">
-            Months Back
-            <span className="flex gap-2 text-lg items-center">
-              <button
-                className="btn btn-square"
-                onClick={decreaseMonthsBack}
-                disabled={numMonthsBack <= 1}
-                aria-label="Decrease months back"
-              >
-                -
-              </button>
-              <span>{numMonthsBack}</span>
-              <button className="btn btn-square" onClick={increaseMonthsBack} aria-label="Increase months back">
-                +
-              </button>
-            </span>
-          </label>
-        </div>}
+        {!hasDedicatedFilters && (
+          <LookbackStepper
+            label="Months Back"
+            value={numMonthsBack}
+            onDecrease={() => setNumberMonthsBack((months) => Math.max(1, months - 1))}
+            onIncrease={() => setNumberMonthsBack((months) => months + 1)}
+          />
+        )}
       </div>
       <div>
       <AnalyticDisplay exerciseId={exerciseId} numMonthsBack={numMonthsBack} analyticType={analyticType} />
