@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 const javaHome = process.env.JAVA_HOME?.replace(/^"(.*)"$/, '$1');
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './src/tests/e2e',
   fullyParallel: false,
   timeout: 60_000,
   retries: process.env.CI ? 2 : 0,

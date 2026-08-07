@@ -4,14 +4,15 @@ import { ExerciseAnalytics, RelativeStrengthAnalytics, WeightAnalytics } from ".
 import { SetsByMuscleGroupPieChart, WorkoutBreakdownPieChart } from "./piecharts";
 import { WeeklyVolumeAnalytics } from "./weekly-volume";
 import { WeeklyOneRepMaxAnalytics } from "./weekly-one-rep-max";
+import { NormalizedStrengthAnalytics } from "./normalized-strength";
 
-type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown" | "weeklyVolume" | "weeklyOneRepMax";
+type AnalyticType = "general" | "relativeStrength" | "weight" | "workoutBreakdown" | "setBreakdown" | "weeklyVolume" | "weeklyOneRepMax" | "normalizedStrength";
 
 export const AnalyticsContainer = () => {
   const [exerciseId, setExerciseId] = useState<number>(-1);
   const [numMonthsBack, setNumberMonthsBack] = useState<number>(2);
   const [analyticType, setAnalyticType] = useState<AnalyticType>("general");
-  const hasDedicatedFilters = analyticType === "weeklyVolume" || analyticType === "weeklyOneRepMax";
+  const hasDedicatedFilters = analyticType === "weeklyVolume" || analyticType === "weeklyOneRepMax" || analyticType === "normalizedStrength";
 
   const increaseMonthsBack = () => {
     setNumberMonthsBack(numMonthsBack + 1);
@@ -51,6 +52,7 @@ export const AnalyticsContainer = () => {
             <option value="setBreakdown">Set Breakdown</option>
             <option value="weeklyVolume">Weekly Volume</option>
             <option value="weeklyOneRepMax">Weekly One Rep Max</option>
+            <option value="normalizedStrength">Normalized Strength</option>
           </select>
         </label>
 
@@ -124,5 +126,8 @@ const AnalyticDisplay = ({ exerciseId, numMonthsBack, analyticType }: AnalyticDi
   }
   if (analyticType === "weeklyOneRepMax") {
     return <WeeklyOneRepMaxAnalytics />;
+  }
+  if (analyticType === "normalizedStrength") {
+    return <NormalizedStrengthAnalytics />;
   }
 }

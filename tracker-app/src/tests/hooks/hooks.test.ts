@@ -1,22 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useQuery } from '@tanstack/react-query';
-import { useGetAiAnalysisByExercise } from './useGetAiAnalysisByExercise';
-import { useGetExerciseAnalytics } from './useGetExerciseAnalytics';
-import { useGetExercises } from './useGetExercises';
-import { useGetRelativeStrengthByExercise } from './useGetGetRelativeStrengthByExercise';
-import { useGetMuscles } from './useGetMuscles';
-import { useGetSetsBreakdownAiAnalysis } from './useGetSetsBreakdownAiAnalysis';
-import { useGetSetsByMuscleGroup } from './useGetSetsByMuscleGroup';
-import { useGetStrongestExercises } from './useGetStrongestExercises';
-import { useGetStrongestExercisesAiAnalysis } from './useGetStrongestExercisesAiAnalysis';
-import { useGetWeeklyOneRepMaxAiAnalysis } from './useGetWeeklyOneRepMaxAiAnalysis';
-import { useGetWeeklyOneRepMaxAnalysis } from './useGetWeeklyOneRepMaxAnalysis';
-import { useGetWeeklyVolumeAiAnalysis } from './useGetWeeklyVolumeAiAnalysis';
-import { useGetWeeklyVolumeAnalysis } from './useGetWeeklyVolumeAnalysis';
-import { useGetWeightsByDate } from './useGetWeightsByDate';
-import { useGetWorkoutsBreakdownAiAnalysis } from './useGetWorkoutsBreakdownAiAnalysis';
-import { useGetWorkoutsByExercise } from './useGetWorkoutsByExercise';
-import { useGetWorkoutsByMuscleGroup } from './useGetWorkoutsByMuscleGroup';
+import { useGetAiAnalysisByExercise } from '../../hooks/useGetAiAnalysisByExercise';
+import { useGetExerciseAnalytics } from '../../hooks/useGetExerciseAnalytics';
+import { useGetExercises } from '../../hooks/useGetExercises';
+import { useGetRelativeStrengthByExercise } from '../../hooks/useGetGetRelativeStrengthByExercise';
+import { useGetMuscles } from '../../hooks/useGetMuscles';
+import { useGetNormalizedStrengthAnalysis } from '../../hooks/useGetNormalizedStrengthAnalysis';
+import { useGetSetsBreakdownAiAnalysis } from '../../hooks/useGetSetsBreakdownAiAnalysis';
+import { useGetSetsByMuscleGroup } from '../../hooks/useGetSetsByMuscleGroup';
+import { useGetStrongestExercises } from '../../hooks/useGetStrongestExercises';
+import { useGetStrongestExercisesAiAnalysis } from '../../hooks/useGetStrongestExercisesAiAnalysis';
+import { useGetWeeklyOneRepMaxAiAnalysis } from '../../hooks/useGetWeeklyOneRepMaxAiAnalysis';
+import { useGetWeeklyOneRepMaxAnalysis } from '../../hooks/useGetWeeklyOneRepMaxAnalysis';
+import { useGetWeeklyVolumeAiAnalysis } from '../../hooks/useGetWeeklyVolumeAiAnalysis';
+import { useGetWeeklyVolumeAnalysis } from '../../hooks/useGetWeeklyVolumeAnalysis';
+import { useGetWeightsByDate } from '../../hooks/useGetWeightsByDate';
+import { useGetWorkoutsBreakdownAiAnalysis } from '../../hooks/useGetWorkoutsBreakdownAiAnalysis';
+import { useGetWorkoutsByExercise } from '../../hooks/useGetWorkoutsByExercise';
+import { useGetWorkoutsByMuscleGroup } from '../../hooks/useGetWorkoutsByMuscleGroup';
 
 vi.mock('@tanstack/react-query', () => ({ useQuery: vi.fn(() => ({ data: undefined })) }));
 
@@ -49,6 +50,7 @@ describe('React Query hook contracts', () => {
     ['weekly volume AI', () => useGetWeeklyVolumeAiAnalysis('CHEST', 8, 5), ['weeklyVolumeAiAnalysis', 'CHEST', 8, 5]],
     ['weekly one-rep max', () => useGetWeeklyOneRepMaxAnalysis(8, 5), ['weeklyOneRepMaxAnalysis', 8, 5]],
     ['weekly one-rep max AI', () => useGetWeeklyOneRepMaxAiAnalysis(8, 5), ['weeklyOneRepMaxAiAnalysis', 8, 5]],
+    ['normalized strength', () => useGetNormalizedStrengthAnalysis('BACK', undefined, 5), ['normalizedStrengthAnalysis', 'BACK', undefined, 5]],
   ])('includes filter arguments in the %s key', (_name, invoke, key) => {
     invoke();
     expect(latestOptions().queryKey).toEqual(key);
@@ -64,6 +66,7 @@ describe('React Query hook contracts', () => {
     () => useGetWeeklyVolumeAiAnalysis('CHEST', undefined, 0),
     () => useGetWeeklyOneRepMaxAnalysis(undefined, 5),
     () => useGetWeeklyOneRepMaxAiAnalysis(undefined, 5),
+    () => useGetNormalizedStrengthAnalysis('ARMS', undefined, 5),
   ])('disables a parameterized query when required filters are invalid', (invoke) => {
     invoke();
     expect(latestOptions().enabled).toBe(false);

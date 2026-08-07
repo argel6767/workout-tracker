@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ExerciseForm, FormContainer, MuscleForm, WeightForm, WorkoutForm } from './forms';
+import { ExerciseForm, FormContainer, MuscleForm, WeightForm, WorkoutForm } from '../../components/forms';
 
 const mocks = vi.hoisted(() => ({
   createExercise: vi.fn(),
@@ -11,15 +11,15 @@ const mocks = vi.hoisted(() => ({
   clear: vi.fn(),
 }));
 
-vi.mock('../api/exercise', () => ({ createExercise: mocks.createExercise }));
-vi.mock('../api/muscles', () => ({ createMuscle: mocks.createMuscle }));
-vi.mock('../api/weights', () => ({ createWeight: mocks.createWeight }));
-vi.mock('../api/workouts', () => ({ createWorkout: mocks.createWorkout }));
-vi.mock('../api/queryClient', () => ({ queryClient: { clear: mocks.clear } }));
-vi.mock('../hooks/useGetMuscles', () => ({
+vi.mock('../../api/exercise', () => ({ createExercise: mocks.createExercise }));
+vi.mock('../../api/muscles', () => ({ createMuscle: mocks.createMuscle }));
+vi.mock('../../api/weights', () => ({ createWeight: mocks.createWeight }));
+vi.mock('../../api/workouts', () => ({ createWorkout: mocks.createWorkout }));
+vi.mock('../../api/queryClient', () => ({ queryClient: { clear: mocks.clear } }));
+vi.mock('../../hooks/useGetMuscles', () => ({
   useGetMuscles: () => ({ data: [{ id: 7, name: 'Biceps', muscleGroup: 'ARMS' }], isLoading: false, isError: false }),
 }));
-vi.mock('./exercise-data', () => ({
+vi.mock('../../components/exercise-data', () => ({
   ExerciseData: ({ handleExerciseChange }: { handleExerciseChange: (event: React.ChangeEvent<HTMLSelectElement>) => void }) => (
     <select aria-label="Exercise" defaultValue="" onChange={handleExerciseChange}>
       <option value="" disabled>Select</option>

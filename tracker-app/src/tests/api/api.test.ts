@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from './apiConfig';
-import * as muscles from './muscles';
-import * as exercises from './exercise';
-import * as workouts from './workouts';
-import * as weights from './weights';
-import * as analytics from './analytics';
+import { apiClient } from '../../api/apiConfig';
+import * as muscles from '../../api/muscles';
+import * as exercises from '../../api/exercise';
+import * as workouts from '../../api/workouts';
+import * as weights from '../../api/weights';
+import * as analytics from '../../api/analytics';
 
-vi.mock('./apiConfig', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }));
+vi.mock('../../api/apiConfig', () => ({ apiClient: { get: vi.fn(), post: vi.fn(), put: vi.fn(), delete: vi.fn() } }));
 
 const response = { data: { id: 1 } };
 

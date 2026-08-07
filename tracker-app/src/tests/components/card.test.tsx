@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { AiAnalysisCard, ExerciseAiAnalysisCard } from './card';
+import { AiAnalysisCard, ExerciseAiAnalysisCard } from '../../components/card';
 
-vi.mock('../hooks/useGetAiAnalysisByExercise', () => ({
+vi.mock('../../hooks/useGetAiAnalysisByExercise', () => ({
   useGetAiAnalysisByExercise: () => ({ data: { body: 'Steady progress' }, isLoading: false, isError: false }),
 }));
 

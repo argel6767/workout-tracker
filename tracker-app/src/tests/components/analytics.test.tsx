@@ -1,20 +1,21 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { AnalyticsContainer } from './analytics';
+import { AnalyticsContainer } from '../../components/analytics';
 
-vi.mock('./exercise-data', () => ({ ExerciseData: () => <div>exercise filter</div> }));
-vi.mock('./linegraphs', () => ({
+vi.mock('../../components/exercise-data', () => ({ ExerciseData: () => <div>exercise filter</div> }));
+vi.mock('../../components/linegraphs', () => ({
   ExerciseAnalytics: ({ numMonthsBack }: { numMonthsBack: number }) => <div>general {numMonthsBack}</div>,
   RelativeStrengthAnalytics: () => <div>relative strength view</div>,
   WeightAnalytics: () => <div>weight view</div>,
 }));
-vi.mock('./piecharts', () => ({
+vi.mock('../../components/piecharts', () => ({
   WorkoutBreakdownPieChart: () => <div>workout breakdown view</div>,
   SetsByMuscleGroupPieChart: () => <div>set breakdown view</div>,
 }));
-vi.mock('./weekly-volume', () => ({ WeeklyVolumeAnalytics: () => <div>weekly volume view</div> }));
-vi.mock('./weekly-one-rep-max', () => ({ WeeklyOneRepMaxAnalytics: () => <div>weekly one rep max view</div> }));
+vi.mock('../../components/weekly-volume', () => ({ WeeklyVolumeAnalytics: () => <div>weekly volume view</div> }));
+vi.mock('../../components/weekly-one-rep-max', () => ({ WeeklyOneRepMaxAnalytics: () => <div>weekly one rep max view</div> }));
+vi.mock('../../components/normalized-strength', () => ({ NormalizedStrengthAnalytics: () => <div>normalized strength view</div> }));
 
 describe('analytics container', () => {
   it('switches among every analytics domain', async () => {
@@ -31,6 +32,7 @@ describe('analytics container', () => {
       ['setBreakdown', 'set breakdown view'],
       ['weeklyVolume', 'weekly volume view'],
       ['weeklyOneRepMax', 'weekly one rep max view'],
+      ['normalizedStrength', 'normalized strength view'],
     ]) {
       await user.selectOptions(selector, value);
       expect(screen.getByText(text)).toBeInTheDocument();

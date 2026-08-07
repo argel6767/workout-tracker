@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    setupFiles: './src/tests/setup.ts',
     clearMocks: true,
-    exclude: ['e2e/**', 'node_modules/**'],
+    exclude: ['src/tests/e2e/**', 'node_modules/**'],
   },
 })

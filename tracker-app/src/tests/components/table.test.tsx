@@ -1,14 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TableContainer } from './table';
+import { TableContainer } from '../../components/table';
 
 const state = vi.hoisted(() => ({ result: { data: undefined as unknown, isLoading: false, isError: false } }));
 
-vi.mock('../hooks/useGetWorkoutsByExercise', () => ({ useGetWorkoutsByExercise: () => state.result }));
-vi.mock('./exercise-data', () => ({ ExerciseData: () => <div>exercise selector</div> }));
-vi.mock('./card', () => ({ ExerciseAiAnalysisCard: () => <div>exercise analysis</div> }));
-vi.mock('./strongest-exercises-table', () => ({ StrongestExercisesTables: () => <div>strongest table</div> }));
+vi.mock('../../hooks/useGetWorkoutsByExercise', () => ({ useGetWorkoutsByExercise: () => state.result }));
+vi.mock('../../components/exercise-data', () => ({ ExerciseData: () => <div>exercise selector</div> }));
+vi.mock('../../components/card', () => ({ ExerciseAiAnalysisCard: () => <div>exercise analysis</div> }));
+vi.mock('../../components/strongest-exercises-table', () => ({ StrongestExercisesTables: () => <div>strongest table</div> }));
 
 beforeEach(() => {
   state.result = { data: undefined, isLoading: false, isError: false };

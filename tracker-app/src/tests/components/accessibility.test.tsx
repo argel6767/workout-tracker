@@ -1,11 +1,11 @@
 import { render } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 import { axe } from 'vitest-axe';
-import { EntryDateForm } from './entry-date';
-import { MuscleForm } from './forms';
+import { EntryDateForm } from '../../components/entry-date';
+import { MuscleForm } from '../../components/forms';
 
-vi.mock('../api/muscles', () => ({ createMuscle: vi.fn() }));
-vi.mock('../api/queryClient', () => ({ queryClient: { clear: vi.fn() } }));
+vi.mock('../../api/muscles', () => ({ createMuscle: vi.fn() }));
+vi.mock('../../api/queryClient', () => ({ queryClient: { clear: vi.fn() } }));
 
 it('has no basic accessibility violations in the shared date input', async () => {
   const { container } = render(<EntryDateForm date={null} onDateChange={() => undefined} />);

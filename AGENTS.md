@@ -53,8 +53,7 @@ Keep frontend code under `tracker-app/src` according to its existing responsibil
 - `hooks/`: TanStack Query hooks and query keys.
 - `components/`: UI, forms, charts, cards, and tables.
 - `lib/`: shared TypeScript DTOs and non-UI types.
-- `src/test/`: shared test setup only; colocate `*.test.ts` and `*.test.tsx` with the code they exercise.
-- `e2e/`: Playwright user journeys that require the complete frontend/API boundary.
+- `src/tests/`: all frontend tests and shared setup. Mirror the source layout beneath it, such as `tests/api/`, `tests/components/`, `tests/hooks/`, and `tests/e2e/`; do not colocate test files with production code.
 
 Use API modules from hooks/components rather than issuing ad hoc HTTP requests. Keep server-state handling in TanStack Query and preserve types across backend DTOs, frontend DTOs, and API functions. Prefer accessible roles and labels, and query those in Testing Library and Playwright tests. Test loading, error, empty, and successful states when the change affects them.
 
