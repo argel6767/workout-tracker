@@ -173,6 +173,16 @@ class ControllerLevelTests {
 
             verify(service).getWeeklyVolumeAnalysis(null, MuscleGroup.CHEST, date, 5);
         }
+
+        @Test
+        void delegatesNormalizedStrengthRequest() {
+            AnalyticsService service = mock(AnalyticsService.class);
+            LocalDate date = LocalDate.of(2026, 8, 5);
+
+            new AnalyticsController(service).getNormalizedStrengthAnalysis(7L, null, date, 8);
+
+            verify(service).getNormalizedStrengthAnalysis(7L, null, date, 8);
+        }
     }
 
     @Nested

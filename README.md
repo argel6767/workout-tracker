@@ -22,6 +22,7 @@ A personal full-stack workout tracker for recording training sessions, monitorin
 - Strongest exercise for a muscle or muscle group.
 - Weekly training-volume comparisons for either a muscle group or an individual muscle.
 - Weekly estimated 1RM comparisons for each exercise associated with an individual muscle.
+- A combined weekly strength index that normalizes each exercise against its first logged session.
 - Configurable week and month lookback periods.
 
 ### AI insights
@@ -196,6 +197,7 @@ All application endpoints are under `/v1`.
 | `GET /v1/analytics/progress/weekly-volume/ai-analysis` | Concise AI analysis of weekly volume |
 | `GET /v1/analytics/progress/weekly-one-rep-max` | Exercise-specific weekly estimated 1RM data for a muscle |
 | `GET /v1/analytics/progress/weekly-one-rep-max/ai-analysis` | Concise AI analysis of weekly estimated 1RM |
+| `GET /v1/analytics/progress/normalized-strength` | Combined weekly baseline strength index for a muscle group or individual muscle |
 | `GET /v1/analytics/strongest-exercises/muscle-groups/{muscleGroup}` | Strongest exercise in a muscle group |
 | `GET /v1/analytics/strongest-exercises/muscles/{muscleId}` | Strongest exercise for an individual muscle |
 | `GET /v1/analytics/strongest-exercises` | Table-ready strongest exercises for all muscles and muscle groups |
@@ -222,6 +224,18 @@ GET /v1/analytics/progress/weekly-one-rep-max?muscleId=9&date=2026-07-22&numWeek
 ```
 
 The response also includes the configured age and latest body-weight entry used as context for AI analysis and bodyweight exercises.
+
+### Normalized strength example
+
+Normalized strength accepts either `muscleGroup` or `muscleId`, but not both. General groups such as `BACK`, `CHEST`, and `LEGS` can be queried directly. Because biceps and triceps both belong to `ARMS`, an `ARMS` request must use the specific biceps or triceps `muscleId`. Each exercise's first session is its `100` baseline. Sessions are averaged per exercise and week before the exercise averages are combined, so frequently performed exercises do not receive extra weight. Weeks without sessions are omitted.
+
+```http
+GET /v1/analytics/progress/normalized-strength?muscleGroup=BACK&date=2026-08-05&numWeeksBack=8
+```
+
+```http
+GET /v1/analytics/progress/normalized-strength?muscleId=9&date=2026-08-05&numWeeksBack=8
+```
 
 ## Calculations
 

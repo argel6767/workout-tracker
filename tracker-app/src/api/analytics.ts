@@ -1,5 +1,5 @@
 import { apiClient } from "./apiConfig"
-import type { DataPoint, AnalyticsDto, ChatResponseDto, RelativeStrengthDto, StrongestExercisesOverviewDto, WeeklyOneRepMaxAnalysisDto, WeeklyVolumeAnalysisDto } from "../lib/analytics-dtos"
+import type { DataPoint, AnalyticsDto, ChatResponseDto, NormalizedStrengthAnalysisDto, RelativeStrengthDto, StrongestExercisesOverviewDto, WeeklyOneRepMaxAnalysisDto, WeeklyVolumeAnalysisDto } from "../lib/analytics-dtos"
 import type { MuscleGroup } from "../lib/form-dtos"
 
 const V1_ANALYTICS = "/v1/analytics"
@@ -116,6 +116,22 @@ export const getWeeklyOneRepMaxAiAnalysis = async (
 ): Promise<ChatResponseDto> => {
   const response = await apiClient.get(`${V1_ANALYTICS}/progress/weekly-one-rep-max/ai-analysis`, {
     params: { muscleId, date, numWeeksBack },
+  });
+  return response.data;
+}
+
+export const getNormalizedStrengthAnalysis = async (
+  muscleGroup: MuscleGroup,
+  muscleId?: number,
+  numWeeksBack = 5,
+  date = new Date().toLocaleDateString("en-CA"),
+): Promise<NormalizedStrengthAnalysisDto> => {
+  const response = await apiClient.get(`${V1_ANALYTICS}/progress/normalized-strength`, {
+    params: {
+      ...(muscleId ? { muscleId } : { muscleGroup }),
+      date,
+      numWeeksBack,
+    },
   });
   return response.data;
 }

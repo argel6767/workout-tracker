@@ -103,3 +103,18 @@ export type WeeklyOneRepMaxAnalysisDto = {
   numWeeksBack: number;
   exercises: ExerciseWeeklyOneRepMaxDto[];
 };
+
+export type NormalizedStrengthPointDto = {
+  weekStart: string;
+  weekEnd: string;
+  averageStrengthIndex: number;
+  exerciseCount: number;
+};
+
+export type NormalizedStrengthAnalysisDto = {
+  muscleId: number | null;
+  muscleGroup: MuscleGroup | null;
+  targetName: string;
+  numWeeksBack: number;
+  trend: NormalizedStrengthPointDto[];
+};

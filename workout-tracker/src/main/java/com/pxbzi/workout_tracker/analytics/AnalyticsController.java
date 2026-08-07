@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pxbzi.workout_tracker.analytics.models.AnalyticsDto;
 import com.pxbzi.workout_tracker.analytics.models.DataPoint;
 import com.pxbzi.workout_tracker.analytics.models.RelativeStrengthDto;
+import com.pxbzi.workout_tracker.analytics.models.NormalizedStrengthAnalysisDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExerciseByMuscleGroupDto;
 import com.pxbzi.workout_tracker.analytics.models.StrongestExercisesOverviewDto;
@@ -91,6 +92,17 @@ public class AnalyticsController {
             @RequestParam(defaultValue = "5") Integer numWeeksBack
     ) {
         return analyticsService.getWeeklyOneRepMaxAnalysis(muscleId, date, numWeeksBack);
+    }
+
+    @GetMapping("/progress/normalized-strength")
+    public NormalizedStrengthAnalysisDto getNormalizedStrengthAnalysis(
+            @RequestParam(required = false) Long muscleId,
+            @RequestParam(required = false) MuscleGroup muscleGroup,
+            @RequestParam LocalDate date,
+            @RequestParam(defaultValue = "5") Integer numWeeksBack
+    ) {
+        return analyticsService.getNormalizedStrengthAnalysis(
+                muscleId, muscleGroup, date, numWeeksBack);
     }
 
     @GetMapping("/progress/weekly-one-rep-max/ai-analysis")

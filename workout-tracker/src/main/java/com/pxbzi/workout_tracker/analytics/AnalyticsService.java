@@ -501,6 +501,109 @@ public class AnalyticsService {
         return geminiService.getConciseChatResponseDto(prompt);
     }
 
+    public NormalizedStrengthAnalysisDto getNormalizedStrengthAnalysis(
+            Long muscleId,
+            MuscleGroup muscleGroup,
+            LocalDate date,
+            Integer numWeeksBack
+    ) {
+        if ((muscleId == null) == (muscleGroup == null)) {
+            throw new IllegalArgumentException("Provide either muscleId or muscleGroup, but not both");
+        }
+        if (muscleGroup == MuscleGroup.ARMS) {
+            throw new IllegalArgumentException(
+                    "ARMS normalized strength requires a biceps or triceps muscleId");
+        }
+        if (numWeeksBack == null || numWeeksBack < 1) {
+            throw new IllegalArgumentException("numWeeksBack must be at least 1");
+        }
+
+        String targetName;
+        if (muscleId != null) {
+            targetName = muscleService.getMuscle(muscleId).name();
+        } else {
+            targetName = muscleGroup.name();
+        }
+        LocalDate currentStart = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate currentEnd = currentStart.plusDays(6);
+        LocalDate earliestStart = currentStart.minusWeeks(numWeeksBack);
+        List<Workout> workouts = muscleId != null
+                ? workoutService.getWorkoutsByMuscleThroughDate(muscleId, currentEnd)
+                : workoutService.getWorkoutsByMuscleGroupThroughDate(muscleGroup, currentEnd);
+
+        Map<LocalDate, Map<Long, List<Double>>> weeklyExerciseIndexes = new TreeMap<>();
+        workouts.stream()
+                .collect(Collectors.groupingBy(workout -> workout.getExercise().getId()))
+                .values()
+                .forEach(exerciseWorkouts -> addNormalizedExerciseSessions(
+                        exerciseWorkouts, earliestStart, currentEnd, weeklyExerciseIndexes));
+
+        List<NormalizedStrengthPointDto> trend = weeklyExerciseIndexes.entrySet().stream()
+                .map(entry -> {
+                    List<Double> exerciseIndexes = entry.getValue().values().stream()
+                            .map(values -> values.stream().mapToDouble(Double::doubleValue).average().orElseThrow())
+                            .toList();
+                    double averageStrengthIndex = exerciseIndexes.stream()
+                            .mapToDouble(Double::doubleValue)
+                            .average()
+                            .orElseThrow();
+                    return new NormalizedStrengthPointDto(
+                            entry.getKey(),
+                            entry.getKey().plusDays(6),
+                            averageStrengthIndex,
+                            exerciseIndexes.size());
+                })
+                .toList();
+
+        return new NormalizedStrengthAnalysisDto(
+                muscleId, muscleGroup, targetName, numWeeksBack, trend);
+    }
+
+    private void addNormalizedExerciseSessions(
+            List<Workout> workouts,
+            LocalDate earliestStart,
+            LocalDate currentEnd,
+            Map<LocalDate, Map<Long, List<Double>>> weeklyExerciseIndexes
+    ) {
+        List<Workout> sortedWorkouts = workouts.stream()
+                .sorted(Comparator.comparing(Workout::getWorkoutDate))
+                .toList();
+        Double baseline = sortedWorkouts.isEmpty()
+                ? null
+                : calculateSessionEstimatedOneRepMax(sortedWorkouts.getFirst());
+        if (baseline == null || baseline <= 0 || !Double.isFinite(baseline)) {
+            return;
+        }
+
+        for (Workout workout : sortedWorkouts) {
+            if (workout.getWorkoutDate().isBefore(earliestStart)
+                    || workout.getWorkoutDate().isAfter(currentEnd)) {
+                continue;
+            }
+            Double sessionOneRepMax = calculateSessionEstimatedOneRepMax(workout);
+            if (sessionOneRepMax == null || !Double.isFinite(sessionOneRepMax)) {
+                continue;
+            }
+            LocalDate weekStart = workout.getWorkoutDate()
+                    .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            weeklyExerciseIndexes
+                    .computeIfAbsent(weekStart, ignored -> new TreeMap<>())
+                    .computeIfAbsent(workout.getExercise().getId(), ignored -> new ArrayList<>())
+                    .add((sessionOneRepMax / baseline) * 100);
+        }
+    }
+
+    private Double calculateSessionEstimatedOneRepMax(Workout workout) {
+        return workout.getWorkoutSets().stream()
+                .mapToDouble(set -> calculateEstimatedOneRepMax(
+                        set, workout.getExercise().getExerciseType()))
+                .max()
+                .stream()
+                .boxed()
+                .findFirst()
+                .orElse(null);
+    }
+
     private ExerciseWeeklyOneRepMaxDto toExerciseWeeklyOneRepMax(
             List<Workout> workouts,
             LocalDate currentStart,

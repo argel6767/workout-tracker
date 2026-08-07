@@ -65,6 +65,17 @@ public class WorkoutService {
         return workoutRepository.findByMuscleAndDateRange(muscleId, startDate, endDate);
     }
 
+    public List<Workout> getWorkoutsByMuscleThroughDate(Long muscleId, LocalDate endDate) {
+        return workoutRepository.findByMuscleThroughDate(muscleId, endDate);
+    }
+
+    public List<Workout> getWorkoutsByMuscleGroupThroughDate(
+            MuscleGroup muscleGroup,
+            LocalDate endDate
+    ) {
+        return workoutRepository.findByMuscleGroupThroughDate(muscleGroup, endDate);
+    }
+
     public List<Workout> getWorkoutsByMuscleGroupAndDateRange(
             MuscleGroup muscleGroup,
             LocalDate startDate,

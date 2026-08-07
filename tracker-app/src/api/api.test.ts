@@ -126,6 +126,18 @@ describe('analytics API', () => {
     expect(apiClient.get).toHaveBeenCalledWith('/v1/analytics/progress/weekly-one-rep-max', { params: { muscleId: 9, date: '2026-07-22', numWeeksBack: 4 } });
     expect(apiClient.get).toHaveBeenCalledWith('/v1/analytics/progress/weekly-one-rep-max/ai-analysis', { params: { muscleId: 9, date: '2026-07-22', numWeeksBack: 4 } });
   });
+
+  it('builds normalized-strength parameters for groups and individual muscles', async () => {
+    await analytics.getNormalizedStrengthAnalysis('BACK', undefined, 8, '2026-08-05');
+    await analytics.getNormalizedStrengthAnalysis('ARMS', 9, 8, '2026-08-05');
+
+    expect(apiClient.get).toHaveBeenNthCalledWith(1, '/v1/analytics/progress/normalized-strength', {
+      params: { muscleGroup: 'BACK', date: '2026-08-05', numWeeksBack: 8 },
+    });
+    expect(apiClient.get).toHaveBeenNthCalledWith(2, '/v1/analytics/progress/normalized-strength', {
+      params: { muscleId: 9, date: '2026-08-05', numWeeksBack: 8 },
+    });
+  });
 });
 
 describe('API errors', () => {

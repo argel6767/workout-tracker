@@ -75,12 +75,46 @@ class RepositoryBoundaryIntegrationTest {
         assertThat(weights.findNewest().orElseThrow().getEntryDate()).isEqualTo(end.plusDays(1));
     }
 
+    @Test
+    void muscleHistoryUsesPrimaryMuscleAndIncludesAllSessionsThroughEndDate() {
+        Muscle biceps = muscles.save(new Muscle("Boundary Biceps", MuscleGroup.ARMS));
+        Muscle triceps = muscles.save(new Muscle("Boundary Triceps", MuscleGroup.ARMS));
+        Exercise curl = saveExercise("Boundary Curl", biceps);
+        Exercise extension = saveExercise("Boundary Extension", triceps);
+        saveWorkout(curl, LocalDate.of(2026, 1, 1), 40);
+        saveWorkout(curl, LocalDate.of(2026, 2, 1), 50);
+        saveWorkout(curl, LocalDate.of(2026, 3, 1), 60);
+        saveWorkout(extension, LocalDate.of(2026, 2, 1), 70);
+
+        assertThat(workouts.findByMuscleThroughDate(biceps.getId(), LocalDate.of(2026, 2, 1)))
+                .extracting(Workout::getWorkoutDate)
+                .containsExactly(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 2, 1));
+        assertThat(workouts.findByMuscleGroupThroughDate(
+                MuscleGroup.ARMS, LocalDate.of(2026, 2, 1)))
+                .extracting(workout -> workout.getExercise().getName())
+                .containsExactly("Boundary Curl", "Boundary Curl", "Boundary Extension");
+    }
+
     private void saveWorkout(LocalDate date, double weight) {
+        saveWorkout(exercise, date, weight);
+    }
+
+    private void saveWorkout(Exercise workoutExercise, LocalDate date, double weight) {
         Workout workout = new Workout();
-        workout.setExercise(exercise);
+        workout.setExercise(workoutExercise);
         workout.setWorkoutDate(date);
         workout.setWorkoutSets(List.of(new WorkoutSet(workout, 8, weight)));
         workouts.saveAndFlush(workout);
+    }
+
+    private Exercise saveExercise(String name, Muscle primaryMuscle) {
+        return exercises.save(Exercise.builder()
+                .name(name)
+                .description("Boundary fixture")
+                .exerciseType(ExerciseType.FREE_WEIGHT)
+                .primaryMuscle(primaryMuscle)
+                .musclesWorked(new ArrayList<>())
+                .build());
     }
 
     private void saveWeight(LocalDate date, double value) {

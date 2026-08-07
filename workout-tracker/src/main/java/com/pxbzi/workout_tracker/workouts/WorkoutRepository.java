@@ -21,6 +21,16 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findByMuscleAndDateRange(@Param("muscleId") Long muscleId,
             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
+    @Query("SELECT w FROM Workout w JOIN w.exercise e JOIN e.primaryMuscle m WHERE m.id = :muscleId " +
+            "AND w.workoutDate <= :endDate ORDER BY w.workoutDate ASC, w.id ASC")
+    List<Workout> findByMuscleThroughDate(@Param("muscleId") Long muscleId,
+            @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT w FROM Workout w JOIN w.exercise e JOIN e.primaryMuscle m WHERE m.muscleGroup = :muscleGroup " +
+            "AND w.workoutDate <= :endDate ORDER BY w.workoutDate ASC, w.id ASC")
+    List<Workout> findByMuscleGroupThroughDate(@Param("muscleGroup") MuscleGroup muscleGroup,
+            @Param("endDate") LocalDate endDate);
+
     @Query("SELECT w FROM Workout w JOIN w.exercise e JOIN e.primaryMuscle m WHERE m.muscleGroup = :muscleGroup " +
             "AND w.workoutDate BETWEEN :startDate AND :endDate ORDER BY w.workoutDate ASC")
     List<Workout> findByMuscleGroupAndDateRange(@Param("muscleGroup") MuscleGroup muscleGroup,

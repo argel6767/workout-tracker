@@ -28,6 +28,7 @@ class OpenApiContractIntegrationTest {
                 .andExpect(jsonPath("$.paths['/v1/workouts']").exists())
                 .andExpect(jsonPath("$.paths['/v1/weights']").exists())
                 .andExpect(jsonPath("$.paths['/v1/analytics/progress/exercise']").exists())
+                .andExpect(jsonPath("$.paths['/v1/analytics/progress/normalized-strength']").exists())
                 .andExpect(jsonPath("$.paths['/v1/data-transfers']").exists())
                 .andExpect(jsonPath("$.paths['/v1/gemini/query']").exists())
                 .andExpect(jsonPath("$.components.schemas.NewMuscleDto.required").isArray())
